@@ -65,7 +65,7 @@ export default async function FinancingPage({ params }: FinancingPageProps) {
 
           {/* Calculator */}
           <div>
-            <FinanceCalculator slug={slug} />
+            <FinanceCalculator slug={slug} price={25000} />
           </div>
 
           {/* Application Form */}
@@ -73,9 +73,6 @@ export default async function FinancingPage({ params }: FinancingPageProps) {
             <LeadForm
               slug={slug}
               vehicleName="Financing Inquiry"
-              type="financing"
-              customTitle="Apply for Financing"
-              customSubtitle="Fill out the form below and our finance team will contact you within 1 business day."
             />
           </div>
         </div>

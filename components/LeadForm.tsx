@@ -1,124 +1,151 @@
 'use client';
 
-import { useState, useCallback, type FormEvent } from 'react';
-import { submitLead } from '@/lib/api';
+import { useState, useCallback } from 'react';
+import { submitLead, submitAppointment } from '@/lib/api';
 
 interface LeadFormProps {
   slug: string;
   vehicleId?: string;
   vehicleName?: string;
-  type?: string;
-  customTitle?: string;
-  customSubtitle?: string;
 }
 
-interface FormState {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  notes: string;
-}
+type Tab = 'message' | 'testdrive' | 'offer';
+type Status = 'idle' | 'submitting' | 'success' | 'error';
 
-type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
-
-const INITIAL_STATE: FormState = {
-  firstName: '',
-  lastName: '',
-  email: '',
-  phone: '',
-  notes: '',
-};
+const TIME_SLOTS = ['9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM'];
 
 /**
- * Lead capture form that POSTs to the public dealer leads API.
- * Shows loading/success/error states with user feedback.
+ * Tabbed lead capture form: Message Dealer, Schedule Test Drive, Make an Offer.
+ * Submits to public API and shows success/error states.
  */
-export default function LeadForm({
-  slug,
-  vehicleId,
-  vehicleName,
-  type = 'inquiry',
-  customTitle,
-  customSubtitle,
-}: LeadFormProps) {
-  const [form, setForm] = useState<FormState>({
-    ...INITIAL_STATE,
-    notes: vehicleName ? `I am interested in the ${vehicleName}.` : '',
-  });
-  const [status, setStatus] = useState<FormStatus>('idle');
-  const [errorMsg, setErrorMsg] = useState<string>('');
+export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps) {
+  const [tab, setTab] = useState<Tab>('message');
+  const [status, setStatus] = useState<Status>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    },
-    []
-  );
+  // Message form
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [message, setMessage] = useState(vehicleName ? `I'm interested in the ${vehicleName}.` : '');
+  const [contactPref, setContactPref] = useState<'call' | 'text' | 'email'>('call');
 
-  const handleSubmit = useCallback(
-    async (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
+  // Test drive form
+  const [tdName, setTdName] = useState('');
+  const [tdPhone, setTdPhone] = useState('');
+  const [tdDate, setTdDate] = useState('');
+  const [tdTime, setTdTime] = useState('');
 
-      if (!form.firstName.trim() || !form.lastName.trim()) {
-        setErrorMsg('Please enter your first and last name.');
-        setStatus('error');
-        return;
-      }
-      if (!form.email.trim()) {
-        setErrorMsg('Please enter your email address.');
-        setStatus('error');
-        return;
-      }
+  // Offer form
+  const [offerName, setOfferName] = useState('');
+  const [offerEmail, setOfferEmail] = useState('');
+  const [offerPrice, setOfferPrice] = useState('');
+  const [offerNote, setOfferNote] = useState('');
 
-      setStatus('submitting');
-      setErrorMsg('');
-
+  const handleMessageSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('submitting');
+    setErrorMsg('');
+    try {
       const result = await submitLead(slug, {
-        firstName: form.firstName.trim(),
-        lastName: form.lastName.trim(),
-        email: form.email.trim(),
-        phone: form.phone.trim() || undefined,
-        notes: form.notes.trim() || undefined,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        notes: `[Contact: ${contactPref}] ${message.trim()}`,
         vehicleId,
-        type,
+        type: 'GENERAL',
       });
-
       if (result) {
         setStatus('success');
-        setForm({
-          ...INITIAL_STATE,
-          notes: vehicleName ? `I am interested in the ${vehicleName}.` : '',
-        });
       } else {
-        setStatus('error');
-        setErrorMsg('Something went wrong. Please try again or call us directly.');
+        throw new Error('No response from server');
       }
-    },
-    [form, slug, vehicleId, vehicleName, type]
-  );
+    } catch {
+      setStatus('error');
+      setErrorMsg('Something went wrong. Please try calling us directly.');
+    }
+  }, [slug, firstName, lastName, email, phone, message, contactPref, vehicleId]);
 
-  const title = customTitle ?? (vehicleName && vehicleName !== 'General Inquiry' && vehicleName !== 'Financing Inquiry'
-    ? 'Interested in This Vehicle?'
-    : 'Send Us a Message');
-  const subtitle = customSubtitle ?? 'Fill out the form and we\'ll get back to you as soon as possible.';
+  const handleTestDriveSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('submitting');
+    setErrorMsg('');
+    try {
+      const nameParts = tdName.trim().split(' ');
+      const result = await submitAppointment(slug, {
+        firstName: nameParts[0] ?? tdName,
+        lastName: nameParts.slice(1).join(' ') || '',
+        phone: tdPhone.trim(),
+        preferredDate: tdDate,
+        preferredTime: tdTime,
+        vehicleId,
+        type: 'TEST_DRIVE',
+        notes: vehicleName ? `Test drive for ${vehicleName}` : undefined,
+      });
+      if (result) {
+        setStatus('success');
+      } else {
+        throw new Error('No response');
+      }
+    } catch {
+      setStatus('error');
+      setErrorMsg('Booking failed. Please call us to schedule.');
+    }
+  }, [slug, tdName, tdPhone, tdDate, tdTime, vehicleId, vehicleName]);
+
+  const handleOfferSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('submitting');
+    setErrorMsg('');
+    try {
+      const nameParts = offerName.trim().split(' ');
+      const result = await submitLead(slug, {
+        firstName: nameParts[0] ?? offerName,
+        lastName: nameParts.slice(1).join(' ') || '',
+        email: offerEmail.trim(),
+        notes: `OFFER: $${offerPrice}. ${offerNote}`.trim(),
+        vehicleId,
+        type: 'OFFER',
+      });
+      if (result) {
+        setStatus('success');
+      } else {
+        throw new Error('No response');
+      }
+    } catch {
+      setStatus('error');
+      setErrorMsg('Failed to submit offer. Please try again.');
+    }
+  }, [slug, offerName, offerEmail, offerPrice, offerNote, vehicleId]);
 
   if (status === 'success') {
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
-        <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-4">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-center">
+        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
           <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h3 className="text-xl font-bold text-gray-900 mb-2">Message Sent!</h3>
-        <p className="text-gray-500 text-sm mb-6">
-          Thank you! We have received your inquiry and will be in touch shortly.
+        <h3 className="text-lg font-bold text-gray-900 mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          {tab === 'testdrive' ? 'Test Drive Requested!' : tab === 'offer' ? 'Offer Submitted!' : 'Message Sent!'}
+        </h3>
+        <p className="text-sm text-gray-500 mb-5">
+          {tab === 'testdrive'
+            ? "We'll confirm your appointment within 2 hours."
+            : tab === 'offer'
+            ? "We'll review your offer and get back to you soon."
+            : "We'll be in touch within a few hours."}
         </p>
         <button
-          onClick={() => setStatus('idle')}
+          type="button"
+          onClick={() => {
+            setStatus('idle');
+            setErrorMsg('');
+          }}
           className="text-sm font-semibold hover:underline"
-          style={{ color: 'var(--primary, #2563eb)' }}
+          style={{ color: 'var(--primary)' }}
         >
           Send Another Message
         </button>
@@ -126,141 +153,339 @@ export default function LeadForm({
     );
   }
 
+  const tabs: Array<{ id: Tab; label: string; icon: string }> = [
+    { id: 'message', label: 'Message', icon: '💬' },
+    { id: 'testdrive', label: 'Test Drive', icon: '🚗' },
+    { id: 'offer', label: 'Make Offer', icon: '💰' },
+  ];
+
+  const inputClass = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors";
+  const labelClass = "block text-xs font-semibold text-gray-500 mb-1";
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-100">
-        <h2 className="text-base font-bold text-gray-900">{title}</h2>
-        <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      {/* Tab navigation */}
+      <div className="flex border-b border-gray-100">
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => { setTab(t.id); setStatus('idle'); setErrorMsg(''); }}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-semibold transition-colors border-b-2 ${
+              tab === t.id
+                ? 'border-blue-600 text-blue-700 bg-blue-50/50'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+            }`}
+            style={tab === t.id ? { borderBottomColor: 'var(--primary)', color: 'var(--primary)' } : {}}
+          >
+            <span className="text-base">{t.icon}</span>
+            {t.label}
+          </button>
+        ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 space-y-4" noValidate>
-        {/* Name Row */}
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label htmlFor="firstName" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-              First Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="firstName"
-              name="firstName"
-              type="text"
-              required
-              autoComplete="given-name"
-              value={form.firstName}
-              onChange={handleChange}
-              placeholder="John"
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="lastName" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-              Last Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="lastName"
-              name="lastName"
-              type="text"
-              required
-              autoComplete="family-name"
-              value={form.lastName}
-              onChange={handleChange}
-              placeholder="Smith"
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
+      <div className="p-5">
+        {/* ── Message Tab ── */}
+        {tab === 'message' && (
+          <form onSubmit={handleMessageSubmit} className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={labelClass} htmlFor="firstName">First Name *</label>
+                <input
+                  id="firstName"
+                  type="text"
+                  required
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className={inputClass}
+                  placeholder="Jane"
+                />
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="lastName">Last Name *</label>
+                <input
+                  id="lastName"
+                  type="text"
+                  required
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className={inputClass}
+                  placeholder="Smith"
+                />
+              </div>
+            </div>
 
-        {/* Email */}
-        <div>
-          <label htmlFor="email" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-            Email <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-            value={form.email}
-            onChange={handleChange}
-            placeholder="john@example.com"
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
+            <div>
+              <label className={labelClass} htmlFor="email">Email *</label>
+              <input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClass}
+                placeholder="jane@example.com"
+              />
+            </div>
 
-        {/* Phone */}
-        <div>
-          <label htmlFor="phone" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-            Phone <span className="text-gray-400 font-normal">(optional)</span>
-          </label>
-          <input
-            id="phone"
-            name="phone"
-            type="tel"
-            autoComplete="tel"
-            value={form.phone}
-            onChange={handleChange}
-            placeholder="(555) 000-0000"
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
+            <div>
+              <label className={labelClass} htmlFor="phone">Phone</label>
+              <input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className={inputClass}
+                placeholder="(555) 000-0000"
+              />
+            </div>
 
-        {/* Message */}
-        <div>
-          <label htmlFor="notes" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-            Message
-          </label>
-          <textarea
-            id="notes"
-            name="notes"
-            rows={4}
-            value={form.notes}
-            onChange={handleChange}
-            placeholder="Tell us about yourself or what you're looking for..."
-            className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-          />
-        </div>
+            <div>
+              <label className={labelClass} htmlFor="message">Message</label>
+              <textarea
+                id="message"
+                rows={3}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className={`${inputClass} resize-none`}
+                placeholder="I'm interested in this vehicle..."
+              />
+            </div>
 
-        {/* Error */}
-        {status === 'error' && errorMsg && (
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700">
-            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            {errorMsg}
-          </div>
+            {/* Preferred Contact */}
+            <div>
+              <label className={labelClass}>Preferred Contact</label>
+              <div className="flex gap-2">
+                {(['call', 'text', 'email'] as const).map((pref) => (
+                  <button
+                    key={pref}
+                    type="button"
+                    onClick={() => setContactPref(pref)}
+                    className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-colors border capitalize ${
+                      contactPref === pref
+                        ? 'text-white border-transparent'
+                        : 'text-gray-600 border-gray-200 bg-gray-50 hover:border-gray-300'
+                    }`}
+                    style={contactPref === pref ? { backgroundColor: 'var(--primary)', borderColor: 'var(--primary)' } : {}}
+                  >
+                    {pref === 'call' ? '📞 Call' : pref === 'text' ? '💬 Text' : '📧 Email'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {errorMsg && (
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{errorMsg}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={status === 'submitting'}
+              className="w-full py-3 rounded-xl font-semibold text-sm text-white transition-all hover:brightness-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              style={{ backgroundColor: 'var(--primary)' }}
+            >
+              {status === 'submitting' ? (
+                <>
+                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Sending...
+                </>
+              ) : (
+                <>Send Message</>
+              )}
+            </button>
+
+            <p className="text-xs text-gray-400 text-center">
+              By submitting, you agree to be contacted by {vehicleName ? 'the dealer' : 'us'} about this inquiry.
+            </p>
+          </form>
         )}
 
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={status === 'submitting'}
-          className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          style={{ backgroundColor: 'var(--primary, #2563eb)' }}
-        >
-          {status === 'submitting' ? (
-            <>
-              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-              Sending...
-            </>
-          ) : (
-            <>
-              Send Message
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-            </>
-          )}
-        </button>
+        {/* ── Test Drive Tab ── */}
+        {tab === 'testdrive' && (
+          <form onSubmit={handleTestDriveSubmit} className="space-y-3">
+            {vehicleName && (
+              <div className="p-3 bg-blue-50 rounded-xl border border-blue-100 text-sm font-medium text-blue-800">
+                🚗 {vehicleName}
+              </div>
+            )}
 
-        <p className="text-center text-xs text-gray-400">
-          We respect your privacy. Your information is never shared.
-        </p>
-      </form>
+            <div>
+              <label className={labelClass} htmlFor="tdName">Full Name *</label>
+              <input
+                id="tdName"
+                type="text"
+                required
+                value={tdName}
+                onChange={(e) => setTdName(e.target.value)}
+                className={inputClass}
+                placeholder="Jane Smith"
+              />
+            </div>
+
+            <div>
+              <label className={labelClass} htmlFor="tdPhone">Phone *</label>
+              <input
+                id="tdPhone"
+                type="tel"
+                required
+                value={tdPhone}
+                onChange={(e) => setTdPhone(e.target.value)}
+                className={inputClass}
+                placeholder="(555) 000-0000"
+              />
+            </div>
+
+            <div>
+              <label className={labelClass} htmlFor="tdDate">Preferred Date *</label>
+              <input
+                id="tdDate"
+                type="date"
+                required
+                value={tdDate}
+                min={new Date().toISOString().split('T')[0]}
+                onChange={(e) => setTdDate(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>Preferred Time</label>
+              <div className="grid grid-cols-3 gap-1.5 max-h-32 overflow-y-auto">
+                {TIME_SLOTS.map((slot) => (
+                  <button
+                    key={slot}
+                    type="button"
+                    onClick={() => setTdTime(slot)}
+                    className={`py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+                      tdTime === slot
+                        ? 'text-white border-transparent'
+                        : 'text-gray-600 border-gray-200 bg-gray-50 hover:border-gray-300'
+                    }`}
+                    style={tdTime === slot ? { backgroundColor: 'var(--primary)', borderColor: 'var(--primary)' } : {}}
+                  >
+                    {slot}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {errorMsg && (
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{errorMsg}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={status === 'submitting'}
+              className="w-full py-3 rounded-xl font-semibold text-sm text-white transition-all hover:brightness-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              style={{ backgroundColor: 'var(--primary)' }}
+            >
+              {status === 'submitting' ? (
+                <>
+                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Booking...
+                </>
+              ) : (
+                <>📅 Schedule Test Drive</>
+              )}
+            </button>
+          </form>
+        )}
+
+        {/* ── Make Offer Tab ── */}
+        {tab === 'offer' && (
+          <form onSubmit={handleOfferSubmit} className="space-y-3">
+            {vehicleName && (
+              <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 text-sm font-medium text-amber-800">
+                💰 Making offer on: {vehicleName}
+              </div>
+            )}
+
+            <div>
+              <label className={labelClass} htmlFor="offerName">Full Name *</label>
+              <input
+                id="offerName"
+                type="text"
+                required
+                value={offerName}
+                onChange={(e) => setOfferName(e.target.value)}
+                className={inputClass}
+                placeholder="Jane Smith"
+              />
+            </div>
+
+            <div>
+              <label className={labelClass} htmlFor="offerEmail">Email *</label>
+              <input
+                id="offerEmail"
+                type="email"
+                required
+                value={offerEmail}
+                onChange={(e) => setOfferEmail(e.target.value)}
+                className={inputClass}
+                placeholder="jane@example.com"
+              />
+            </div>
+
+            <div>
+              <label className={labelClass} htmlFor="offerPrice">Your Offer Price *</label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-sm">$</span>
+                <input
+                  id="offerPrice"
+                  type="number"
+                  required
+                  value={offerPrice}
+                  onChange={(e) => setOfferPrice(e.target.value)}
+                  className={`${inputClass} pl-7`}
+                  placeholder="18,500"
+                  min="0"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className={labelClass} htmlFor="offerNote">Additional Notes</label>
+              <textarea
+                id="offerNote"
+                rows={2}
+                value={offerNote}
+                onChange={(e) => setOfferNote(e.target.value)}
+                className={`${inputClass} resize-none`}
+                placeholder="Any conditions or questions..."
+              />
+            </div>
+
+            {errorMsg && (
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{errorMsg}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={status === 'submitting'}
+              className="w-full py-3 rounded-xl font-semibold text-sm text-white transition-all hover:brightness-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              style={{ backgroundColor: 'var(--primary)' }}
+            >
+              {status === 'submitting' ? (
+                <>
+                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Submitting...
+                </>
+              ) : (
+                <>Submit Offer</>
+              )}
+            </button>
+          </form>
+        )}
+      </div>
     </div>
   );
 }
