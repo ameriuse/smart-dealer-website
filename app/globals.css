@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #2563eb;
+  --secondary: #1e40af;
+  --primary-foreground: #ffffff;
+}
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-gray-900 antialiased;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer utilities {
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white transition-all duration-200;
+    background-color: var(--primary, #2563eb);
+  }
+  .btn-primary:hover {
+    filter: brightness(0.9);
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden;
+  }
+
+  .score-green {
+    color: #16a34a;
+  }
+  .score-yellow {
+    color: #d97706;
+  }
+  .score-red {
+    color: #dc2626;
+  }
+  .score-gray {
+    color: #6b7280;
+  }
+
+  .badge-green {
+    @apply bg-green-100 text-green-700;
+  }
+  .badge-yellow {
+    @apply bg-yellow-100 text-yellow-700;
+  }
+  .badge-red {
+    @apply bg-red-100 text-red-700;
+  }
+  .badge-gray {
+    @apply bg-gray-100 text-gray-500;
+  }
+}
+
+/* Scrollbar for photo gallery */
+.thumb-strip::-webkit-scrollbar {
+  height: 4px;
+}
+.thumb-strip::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+.thumb-strip::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
