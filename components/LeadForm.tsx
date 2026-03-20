@@ -14,6 +14,24 @@ type Status = 'idle' | 'submitting' | 'success' | 'error';
 
 const TIME_SLOTS = ['9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM'];
 
+const IconMessage = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+  </svg>
+);
+
+const IconCalendar = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+  </svg>
+);
+
+const IconTag = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a2 2 0 012-2z" />
+  </svg>
+);
+
 /**
  * Tabbed lead capture form: Message Dealer, Schedule Test Drive, Make an Offer.
  * Submits to public API and shows success/error states.
@@ -128,7 +146,7 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h3 className="text-lg font-bold text-gray-900 mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+        <h3 className="text-lg font-bold text-gray-900 mb-2">
           {tab === 'testdrive' ? 'Test Drive Requested!' : tab === 'offer' ? 'Offer Submitted!' : 'Message Sent!'}
         </h3>
         <p className="text-sm text-gray-500 mb-5">
@@ -140,10 +158,7 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
         </p>
         <button
           type="button"
-          onClick={() => {
-            setStatus('idle');
-            setErrorMsg('');
-          }}
+          onClick={() => { setStatus('idle'); setErrorMsg(''); }}
           className="text-sm font-semibold hover:underline"
           style={{ color: 'var(--primary)' }}
         >
@@ -153,10 +168,10 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
     );
   }
 
-  const tabs: Array<{ id: Tab; label: string; icon: string }> = [
-    { id: 'message', label: 'Message', icon: '💬' },
-    { id: 'testdrive', label: 'Test Drive', icon: '🚗' },
-    { id: 'offer', label: 'Make Offer', icon: '💰' },
+  const tabs: Array<{ id: Tab; label: string; Icon: () => JSX.Element }> = [
+    { id: 'message', label: 'Message', Icon: IconMessage },
+    { id: 'testdrive', label: 'Test Drive', Icon: IconCalendar },
+    { id: 'offer', label: 'Make Offer', Icon: IconTag },
   ];
 
   const inputClass = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors";
@@ -178,7 +193,7 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
             }`}
             style={tab === t.id ? { borderBottomColor: 'var(--primary)', color: 'var(--primary)' } : {}}
           >
-            <span className="text-base">{t.icon}</span>
+            <t.Icon />
             {t.label}
           </button>
         ))}
@@ -191,65 +206,33 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={labelClass} htmlFor="firstName">First Name *</label>
-                <input
-                  id="firstName"
-                  type="text"
-                  required
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className={inputClass}
-                  placeholder="Jane"
-                />
+                <input id="firstName" type="text" required value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)} className={inputClass} placeholder="Jane" />
               </div>
               <div>
                 <label className={labelClass} htmlFor="lastName">Last Name *</label>
-                <input
-                  id="lastName"
-                  type="text"
-                  required
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className={inputClass}
-                  placeholder="Smith"
-                />
+                <input id="lastName" type="text" required value={lastName}
+                  onChange={(e) => setLastName(e.target.value)} className={inputClass} placeholder="Smith" />
               </div>
             </div>
 
             <div>
               <label className={labelClass} htmlFor="email">Email *</label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={inputClass}
-                placeholder="jane@example.com"
-              />
+              <input id="email" type="email" required value={email}
+                onChange={(e) => setEmail(e.target.value)} className={inputClass} placeholder="jane@example.com" />
             </div>
 
             <div>
               <label className={labelClass} htmlFor="phone">Phone</label>
-              <input
-                id="phone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className={inputClass}
-                placeholder="(555) 000-0000"
-              />
+              <input id="phone" type="tel" value={phone}
+                onChange={(e) => setPhone(e.target.value)} className={inputClass} placeholder="(555) 000-0000" />
             </div>
 
             <div>
               <label className={labelClass} htmlFor="message">Message</label>
-              <textarea
-                id="message"
-                rows={3}
-                value={message}
+              <textarea id="message" rows={3} value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className={`${inputClass} resize-none`}
-                placeholder="I'm interested in this vehicle..."
-              />
+                className={`${inputClass} resize-none`} placeholder="I'm interested in this vehicle..." />
             </div>
 
             {/* Preferred Contact */}
@@ -261,14 +244,14 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
                     key={pref}
                     type="button"
                     onClick={() => setContactPref(pref)}
-                    className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-colors border capitalize ${
+                    className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all border capitalize ${
                       contactPref === pref
-                        ? 'text-white border-transparent'
-                        : 'text-gray-600 border-gray-200 bg-gray-50 hover:border-gray-300'
+                        ? 'text-white border-transparent shadow-sm'
+                        : 'text-gray-600 border-gray-200 bg-white hover:border-gray-300'
                     }`}
                     style={contactPref === pref ? { backgroundColor: 'var(--primary)', borderColor: 'var(--primary)' } : {}}
                   >
-                    {pref === 'call' ? '📞 Call' : pref === 'text' ? '💬 Text' : '📧 Email'}
+                    {pref === 'call' ? 'Call' : pref === 'text' ? 'Text' : 'Email'}
                   </button>
                 ))}
               </div>
@@ -278,23 +261,15 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
               <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{errorMsg}</p>
             )}
 
-            <button
-              type="submit"
-              disabled={status === 'submitting'}
+            <button type="submit" disabled={status === 'submitting'}
               className="w-full py-3 rounded-xl font-semibold text-sm text-white transition-all hover:brightness-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              style={{ backgroundColor: 'var(--primary)' }}
-            >
+              style={{ backgroundColor: 'var(--primary)' }}>
               {status === 'submitting' ? (
-                <>
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Sending...
-                </>
-              ) : (
-                <>Send Message</>
-              )}
+                <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>Sending...</>
+              ) : 'Send Message'}
             </button>
 
             <p className="text-xs text-gray-400 text-center">
@@ -308,64 +283,38 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
           <form onSubmit={handleTestDriveSubmit} className="space-y-3">
             {vehicleName && (
               <div className="p-3 bg-blue-50 rounded-xl border border-blue-100 text-sm font-medium text-blue-800">
-                🚗 {vehicleName}
+                {vehicleName}
               </div>
             )}
 
             <div>
               <label className={labelClass} htmlFor="tdName">Full Name *</label>
-              <input
-                id="tdName"
-                type="text"
-                required
-                value={tdName}
-                onChange={(e) => setTdName(e.target.value)}
-                className={inputClass}
-                placeholder="Jane Smith"
-              />
+              <input id="tdName" type="text" required value={tdName}
+                onChange={(e) => setTdName(e.target.value)} className={inputClass} placeholder="Jane Smith" />
             </div>
 
             <div>
               <label className={labelClass} htmlFor="tdPhone">Phone *</label>
-              <input
-                id="tdPhone"
-                type="tel"
-                required
-                value={tdPhone}
-                onChange={(e) => setTdPhone(e.target.value)}
-                className={inputClass}
-                placeholder="(555) 000-0000"
-              />
+              <input id="tdPhone" type="tel" required value={tdPhone}
+                onChange={(e) => setTdPhone(e.target.value)} className={inputClass} placeholder="(555) 000-0000" />
             </div>
 
             <div>
               <label className={labelClass} htmlFor="tdDate">Preferred Date *</label>
-              <input
-                id="tdDate"
-                type="date"
-                required
-                value={tdDate}
+              <input id="tdDate" type="date" required value={tdDate}
                 min={new Date().toISOString().split('T')[0]}
-                onChange={(e) => setTdDate(e.target.value)}
-                className={inputClass}
-              />
+                onChange={(e) => setTdDate(e.target.value)} className={inputClass} />
             </div>
 
             <div>
               <label className={labelClass}>Preferred Time</label>
               <div className="grid grid-cols-3 gap-1.5 max-h-32 overflow-y-auto">
                 {TIME_SLOTS.map((slot) => (
-                  <button
-                    key={slot}
-                    type="button"
-                    onClick={() => setTdTime(slot)}
+                  <button key={slot} type="button" onClick={() => setTdTime(slot)}
                     className={`py-1.5 rounded-lg text-xs font-medium transition-colors border ${
-                      tdTime === slot
-                        ? 'text-white border-transparent'
-                        : 'text-gray-600 border-gray-200 bg-gray-50 hover:border-gray-300'
+                      tdTime === slot ? 'text-white border-transparent' : 'text-gray-600 border-gray-200 bg-gray-50 hover:border-gray-300'
                     }`}
-                    style={tdTime === slot ? { backgroundColor: 'var(--primary)', borderColor: 'var(--primary)' } : {}}
-                  >
+                    style={tdTime === slot ? { backgroundColor: 'var(--primary)', borderColor: 'var(--primary)' } : {}}>
                     {slot}
                   </button>
                 ))}
@@ -376,23 +325,15 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
               <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{errorMsg}</p>
             )}
 
-            <button
-              type="submit"
-              disabled={status === 'submitting'}
+            <button type="submit" disabled={status === 'submitting'}
               className="w-full py-3 rounded-xl font-semibold text-sm text-white transition-all hover:brightness-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              style={{ backgroundColor: 'var(--primary)' }}
-            >
+              style={{ backgroundColor: 'var(--primary)' }}>
               {status === 'submitting' ? (
-                <>
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Booking...
-                </>
-              ) : (
-                <>📅 Schedule Test Drive</>
-              )}
+                <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>Booking...</>
+              ) : 'Schedule Test Drive'}
             </button>
           </form>
         )}
@@ -402,86 +343,52 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
           <form onSubmit={handleOfferSubmit} className="space-y-3">
             {vehicleName && (
               <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 text-sm font-medium text-amber-800">
-                💰 Making offer on: {vehicleName}
+                Making offer on: {vehicleName}
               </div>
             )}
 
             <div>
               <label className={labelClass} htmlFor="offerName">Full Name *</label>
-              <input
-                id="offerName"
-                type="text"
-                required
-                value={offerName}
-                onChange={(e) => setOfferName(e.target.value)}
-                className={inputClass}
-                placeholder="Jane Smith"
-              />
+              <input id="offerName" type="text" required value={offerName}
+                onChange={(e) => setOfferName(e.target.value)} className={inputClass} placeholder="Jane Smith" />
             </div>
 
             <div>
               <label className={labelClass} htmlFor="offerEmail">Email *</label>
-              <input
-                id="offerEmail"
-                type="email"
-                required
-                value={offerEmail}
-                onChange={(e) => setOfferEmail(e.target.value)}
-                className={inputClass}
-                placeholder="jane@example.com"
-              />
+              <input id="offerEmail" type="email" required value={offerEmail}
+                onChange={(e) => setOfferEmail(e.target.value)} className={inputClass} placeholder="jane@example.com" />
             </div>
 
             <div>
               <label className={labelClass} htmlFor="offerPrice">Your Offer Price *</label>
               <div className="relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-sm">$</span>
-                <input
-                  id="offerPrice"
-                  type="number"
-                  required
-                  value={offerPrice}
+                <input id="offerPrice" type="number" required value={offerPrice}
                   onChange={(e) => setOfferPrice(e.target.value)}
-                  className={`${inputClass} pl-7`}
-                  placeholder="18,500"
-                  min="0"
-                />
+                  className={`${inputClass} pl-7`} placeholder="18,500" min="0" />
               </div>
             </div>
 
             <div>
               <label className={labelClass} htmlFor="offerNote">Additional Notes</label>
-              <textarea
-                id="offerNote"
-                rows={2}
-                value={offerNote}
+              <textarea id="offerNote" rows={2} value={offerNote}
                 onChange={(e) => setOfferNote(e.target.value)}
-                className={`${inputClass} resize-none`}
-                placeholder="Any conditions or questions..."
-              />
+                className={`${inputClass} resize-none`} placeholder="Any conditions or questions..." />
             </div>
 
             {errorMsg && (
               <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{errorMsg}</p>
             )}
 
-            <button
-              type="submit"
-              disabled={status === 'submitting'}
+            <button type="submit" disabled={status === 'submitting'}
               className="w-full py-3 rounded-xl font-semibold text-sm text-white transition-all hover:brightness-95 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              style={{ backgroundColor: 'var(--primary)' }}
-            >
+              style={{ backgroundColor: 'var(--primary)' }}>
               {status === 'submitting' ? (
-                <>
-                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Submitting...
-                </>
-              ) : (
-                <>Submit Offer</>
-              )}
+                <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>Submitting...</>
+              ) : 'Submit Offer'}
             </button>
           </form>
         )}

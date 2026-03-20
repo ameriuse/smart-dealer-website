@@ -4,6 +4,7 @@ import { getDealer, getVehicle } from '@/lib/api';
 import PhotoGallery from '@/components/PhotoGallery';
 import FinanceCalculator from '@/components/FinanceCalculator';
 import LeadForm from '@/components/LeadForm';
+import ScoreRing from '@/components/ScoreRing';
 import type { Metadata } from 'next';
 
 interface VDPProps {
@@ -164,26 +165,18 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
                 </div>
 
                 <div className="p-5">
-                  {/* Overall score bar */}
+                  {/* Overall score ring */}
                   {score != null && (
-                    <div className="mb-6">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-semibold text-gray-700">Overall Score</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl font-bold tabular-nums" style={{ color: scoreHex }}>{score}</span>
-                          <span className="text-sm text-gray-400">/ 100</span>
-                          {scoreLabel && (
-                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: scoreHex + '18', color: scoreHex }}>
-                              {scoreLabel}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all duration-700"
-                          style={{ width: `${score}%`, backgroundColor: scoreHex }}
-                        />
+                    <div className="flex items-center gap-6 mb-6">
+                      <ScoreRing score={score} color={scoreHex} label={scoreLabel} />
+                      <div>
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Overall Score</p>
+                        <p className="text-4xl font-extrabold tabular-nums" style={{ color: scoreHex }}>{score}<span className="text-lg text-gray-400 font-normal">/100</span></p>
+                        {scoreLabel && (
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-full mt-1 inline-block" style={{ backgroundColor: scoreHex + '18', color: scoreHex }}>
+                            {scoreLabel}
+                          </span>
+                        )}
                       </div>
                     </div>
                   )}
@@ -325,7 +318,7 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
                     { label: 'Year', value: vehicle.year },
                     { label: 'Make', value: vehicle.make },
                     { label: 'Model', value: vehicle.model },
-                    { label: 'Mileage', value: vehicle.odometer != null ? formatMileage(vehicle.odometer) : 'N/A' },
+                    { label: 'Mileage', value: vehicle.odometer != null ? formatMileage(vehicle.odometer) : 'Ask dealer' },
                     { label: 'VIN', value: vehicle.vin ?? 'N/A' },
                     ...(dealer.showPricing && vehicle.price != null ? [{ label: 'Price', value: formatPrice(vehicle.price) }] : []),
                   ].map(({ label, value }) => (
