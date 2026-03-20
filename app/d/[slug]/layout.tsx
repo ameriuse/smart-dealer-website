@@ -53,14 +53,37 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
   const templateId = cfg?.templateId ?? 'classic';
   const primaryColor = cfg?.primaryColor ?? '#1d4ed8';
   const secondaryColor = cfg?.secondaryColor ?? '#1e40af';
+  const accentColor = cfg?.accentColor ?? '#3B82F6';
+  const displayLogoUrl = cfg?.logoUrl || dealer.logoUrl;
 
   // Luxury template: fixed dark/gold palette
   const cssVars =
     templateId === 'luxury'
-      ? `--primary: #c9a84c; --secondary: #a8852b; --primary-foreground: #0a0a0a; --bg: #0a0a0a; --surface: #1a1a1a; --text: #f5f5f5;`
+      ? `--primary: #c9a84c; --secondary: #a8852b; --accent: #c9a84c; --primary-foreground: #0a0a0a; --bg: #0a0a0a; --surface: #1a1a1a; --text: #f5f5f5;`
       : templateId === 'modern'
-      ? `--primary: ${primaryColor}; --secondary: ${secondaryColor}; --primary-foreground: #ffffff; --bg: #f8fafc; --surface: #ffffff; --text: #0f172a;`
-      : `--primary: ${primaryColor}; --secondary: ${secondaryColor}; --primary-foreground: #ffffff; --bg: #ffffff; --surface: #f8fafc; --text: #0f172a;`;
+      ? `--primary: ${primaryColor}; --secondary: ${secondaryColor}; --accent: ${accentColor}; --primary-foreground: #ffffff; --bg: #f8fafc; --surface: #ffffff; --text: #0f172a;`
+      : `--primary: ${primaryColor}; --secondary: ${secondaryColor}; --accent: ${accentColor}; --primary-foreground: #ffffff; --bg: #ffffff; --surface: #f8fafc; --text: #0f172a;`;
+
+  const isClassic = templateId === 'classic';
+  const isLuxury = templateId === 'luxury';
+
+  const headerClass = isLuxury
+    ? 'border-b border-[#333333] sticky top-0 z-50'
+    : 'bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 shadow-sm';
+
+  const navLinkClass = isClassic
+    ? 'px-4 py-2 rounded-md text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors'
+    : isLuxury
+    ? 'px-4 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-[#c9a84c] transition-colors'
+    : 'px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors';
+
+  const logoTextClass = isClassic
+    ? 'text-lg font-bold text-white truncate max-w-[200px]'
+    : 'text-lg font-bold text-gray-900 dark:text-white truncate max-w-[200px]';
+
+  const phoneClass = isClassic
+    ? 'flex items-center gap-2 text-sm font-semibold text-white/90 hover:text-white transition-colors whitespace-nowrap'
+    : 'flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-gray-900 transition-colors whitespace-nowrap';
 
   return (
     <div className={`template-${templateId}`}>
@@ -76,7 +99,10 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
       )}
 
       {/* ── Header ── */}
-      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 shadow-sm">
+      <header
+        className={headerClass}
+        style={isClassic ? { backgroundColor: 'var(--primary)' } : undefined}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16 gap-3">
 
@@ -85,9 +111,9 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
 
             {/* Logo */}
             <Link href={`/d/${slug}`} className="flex items-center min-w-0 mr-auto lg:mr-0 flex-shrink-0">
-              {dealer.logoUrl ? (
+              {displayLogoUrl ? (
                 <Image
-                  src={dealer.logoUrl}
+                  src={displayLogoUrl}
                   alt={dealer.name}
                   width={140}
                   height={44}
@@ -95,20 +121,14 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
                   priority
                 />
               ) : (
-                <span className="text-lg font-bold text-gray-900 dark:text-white truncate max-w-[200px]">
-                  {dealer.name}
-                </span>
+                <span className={logoTextClass}>{dealer.name}</span>
               )}
             </Link>
 
             {/* Desktop nav — centered */}
             <nav className="hidden lg:flex items-center gap-0.5 flex-1 justify-center">
               {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                >
+                <Link key={link.href} href={link.href} className={navLinkClass}>
                   {link.label}
                 </Link>
               ))}
@@ -118,23 +138,30 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
             <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
               <DarkModeToggle />
               {dealer.phone && (
-                <a
-                  href={`tel:${dealer.phone}`}
-                  className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-gray-900 transition-colors whitespace-nowrap"
-                >
-                  <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <a href={`tel:${dealer.phone}`} className={phoneClass}>
+                  <svg className={`w-4 h-4 flex-shrink-0 ${isClassic ? 'text-white/60' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
                   {dealer.phone}
                 </a>
               )}
-              <Link
-                href={`/d/${slug}/financing`}
-                className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:brightness-90 whitespace-nowrap"
-                style={{ backgroundColor: 'var(--primary, #1d4ed8)' }}
-              >
-                Get Pre-Approved
-              </Link>
+              {isClassic ? (
+                <Link
+                  href={`/d/${slug}/financing`}
+                  className="px-4 py-2.5 rounded-lg text-sm font-semibold bg-white transition-all hover:bg-gray-100 whitespace-nowrap"
+                  style={{ color: 'var(--primary)' }}
+                >
+                  Get Pre-Approved
+                </Link>
+              ) : (
+                <Link
+                  href={`/d/${slug}/financing`}
+                  className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:brightness-90 whitespace-nowrap"
+                  style={{ backgroundColor: 'var(--primary, #1d4ed8)' }}
+                >
+                  Get Pre-Approved
+                </Link>
+              )}
             </div>
 
             {/* Mobile: dark mode + call button (right) */}
@@ -166,9 +193,9 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
 
             {/* Dealer info */}
             <div>
-              {dealer.logoUrl ? (
+              {displayLogoUrl ? (
                 <Image
-                  src={dealer.logoUrl}
+                  src={displayLogoUrl}
                   alt={dealer.name}
                   width={130}
                   height={44}

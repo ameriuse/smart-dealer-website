@@ -14,6 +14,8 @@ export type Dealer = {
   websiteConfig?: {
     primaryColor: string;
     secondaryColor: string;
+    accentColor?: string | null;
+    logoUrl?: string | null;
     templateId: string;
   } | null;
 };
