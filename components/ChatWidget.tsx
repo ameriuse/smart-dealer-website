@@ -86,11 +86,11 @@ export default function ChatWidget({ dealerName, slug }: ChatWidgetProps) {
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
       {/* Chat panel */}
       {open && (
-        <div className="w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
+        <div className="chat-widget-container w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
           style={{ height: '480px' }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100" style={{ backgroundColor: 'var(--primary, #1d4ed8)' }}>
+          <div className="chat-header flex items-center justify-between px-4 py-3 border-b border-gray-100" style={{ backgroundColor: 'var(--primary, #1d4ed8)' }}>
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
                 <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -114,7 +114,7 @@ export default function ChatWidget({ dealerName, slug }: ChatWidgetProps) {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+          <div className="chat-messages flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
             {messages.map((msg, i) => (
               <div
                 key={i}
@@ -123,8 +123,8 @@ export default function ChatWidget({ dealerName, slug }: ChatWidgetProps) {
                 <div
                   className={`max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
                     msg.role === 'user'
-                      ? 'text-white rounded-br-md'
-                      : 'bg-white text-gray-800 border border-gray-200 rounded-bl-md shadow-sm'
+                      ? 'chat-user-message text-white rounded-br-md'
+                      : 'chat-bot-message bg-white text-gray-800 border border-gray-200 rounded-bl-md shadow-sm'
                   }`}
                   style={msg.role === 'user' ? { backgroundColor: 'var(--primary, #1d4ed8)' } : {}}
                 >
@@ -164,7 +164,7 @@ export default function ChatWidget({ dealerName, slug }: ChatWidgetProps) {
           </div>
 
           {/* Input */}
-          <form onSubmit={handleSubmit} className="flex items-center gap-2 p-3 border-t border-gray-100 bg-white">
+          <form onSubmit={handleSubmit} className="chat-input-area flex items-center gap-2 p-3 border-t border-gray-100 bg-white">
             <input
               ref={inputRef}
               type="text"
@@ -172,7 +172,7 @@ export default function ChatWidget({ dealerName, slug }: ChatWidgetProps) {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type a message..."
               disabled={loading}
-              className="flex-1 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-colors disabled:opacity-50"
+              className="chat-input flex-1 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 transition-colors disabled:opacity-50"
             />
             <button
               type="submit"

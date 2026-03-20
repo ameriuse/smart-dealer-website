@@ -193,9 +193,22 @@ button.icon-only, a.icon-only {
 }
 
 /* ─── Dark mode overrides ─────────────────────────────────── */
+
+/* Light mode — explicit pure white */
+body {
+  background: #ffffff;
+  color: #0f172a;
+}
+
 .dark body {
   background-color: #0f172a;
   color: #f1f5f9;
+}
+
+/* Strong dark mode contrast */
+html.dark body {
+  background: #0f172a !important;
+  color: #f1f5f9 !important;
 }
 
 .dark header {
@@ -280,11 +293,47 @@ html.dark section.bg-white { background-color: #0f172a !important; }
 html.dark .border { border-color: #334155 !important; }
 
 /* Chat widget dark mode */
-html.dark .chat-widget,
-html.dark [class*="chat-"] {
+html.dark .chat-widget-container {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark .chat-messages {
+  background: #0f172a !important;
+}
+
+html.dark .chat-bot-message {
   background: #1e293b !important;
   color: #f1f5f9 !important;
   border-color: #334155 !important;
+}
+
+html.dark .chat-user-message {
+  background: var(--primary, #1d4ed8) !important;
+  color: #ffffff !important;
+}
+
+html.dark .chat-input-area {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+html.dark .chat-input {
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #475569 !important;
+}
+
+/* Vehicle cards in dark mode */
+html.dark .vehicle-card,
+html.dark [class*="card"] {
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+/* All gray text → readable slate in dark mode */
+html.dark [class*="text-gray"] {
+  color: #94a3b8 !important;
 }
 
 /* ─── Template-specific overrides ──────────────────────────── */
