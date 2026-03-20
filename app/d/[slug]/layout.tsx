@@ -63,7 +63,7 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
       : `--primary: ${primaryColor}; --secondary: ${secondaryColor}; --primary-foreground: #ffffff; --bg: #ffffff; --surface: #f8fafc; --text: #0f172a;`;
 
   return (
-    <>
+    <div className={`template-${templateId}`}>
       <style>{`:root { ${cssVars} }`}</style>
 
       {/* Luxury template: inject dark mode class immediately */}
@@ -245,6 +245,6 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
 
       {/* AI Chat Widget */}
       <ChatWidget dealerName={dealer.name} slug={slug} />
-    </>
+    </div>
   );
 }

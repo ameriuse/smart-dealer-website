@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getDealer, getVehicles } from '@/lib/api';
-import VehicleCard from '@/components/VehicleCard';
+import AnimatedVehicleGrid from '@/components/AnimatedVehicleGrid';
 
 interface HomePageProps {
   params: { slug: string };
@@ -172,17 +172,13 @@ export default async function DealerHomePage({ params }: HomePageProps) {
                 View All →
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {recentVehicles.map((vehicle, i) => (
-                <VehicleCard
-                  key={vehicle.id}
-                  vehicle={vehicle}
-                  slug={slug}
-                  showPricing={dealer.showPricing}
-                  priority={i < 4}
-                />
-              ))}
-            </div>
+            <AnimatedVehicleGrid
+              vehicles={recentVehicles}
+              slug={slug}
+              showPricing={dealer.showPricing}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+              priorityCount={4}
+            />
           </div>
         </section>
       )}
@@ -251,17 +247,13 @@ export default async function DealerHomePage({ params }: HomePageProps) {
                 View All {totalCount} →
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {featuredVehicles.map((vehicle, i) => (
-                <VehicleCard
-                  key={vehicle.id}
-                  vehicle={vehicle}
-                  slug={slug}
-                  showPricing={dealer.showPricing}
-                  priority={i < 3}
-                />
-              ))}
-            </div>
+            <AnimatedVehicleGrid
+              vehicles={featuredVehicles}
+              slug={slug}
+              showPricing={dealer.showPricing}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+              priorityCount={3}
+            />
             <div className="mt-8 text-center">
               <Link
                 href={`/d/${slug}/inventory`}
