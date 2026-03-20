@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-export const runtime = 'edge';
+import OpenAI from 'openai';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -24,10 +23,12 @@ export async function POST(req: NextRequest) {
       slug: string;
     };
 
-    const apiKey = process.env.GOOGLE_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'Chat unavailable' }, { status: 503 });
     }
+
+    const openai = new OpenAI({ apiKey });
 
     const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://smart-dealer-saas.vercel.app';
 
@@ -87,40 +88,25 @@ RULES:
 - Always end your response with a helpful next step
 - NEVER say "I'm sorry, I couldn't process that" — always give a useful response`;
 
-    // Build Gemini content array from chat history
+    // Build OpenAI messages array from chat history
     const history = messages.slice(-10, -1).map((m) => ({
-      role: m.role === 'user' ? 'user' : 'model',
-      parts: [{ text: m.content }],
+      role: m.role as 'user' | 'assistant',
+      content: m.content,
     }));
 
     const lastMessage = messages[messages.length - 1];
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          contents: [
-            ...history,
-            { role: 'user', parts: [{ text: lastMessage?.content ?? '' }] },
-          ],
-          generationConfig: { maxOutputTokens: 256 },
-        }),
-      }
-    );
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...history,
+        { role: 'user', content: lastMessage?.content ?? '' },
+      ],
+      max_tokens: 256,
+    });
 
-    if (!response.ok) {
-      const errBody = await response.text().catch(() => '');
-      console.error(`Gemini API ${response.status}:`, errBody);
-      throw new Error(`Gemini API error: ${response.status} — ${errBody.slice(0, 200)}`);
-    }
-
-    const data = await response.json() as {
-      candidates: Array<{ content: { parts: Array<{ text: string }> } }>;
-    };
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const text = completion.choices[0]?.message?.content ?? '';
 
     return NextResponse.json({ message: text });
   } catch (err) {
