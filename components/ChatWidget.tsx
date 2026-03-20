@@ -65,7 +65,7 @@ export default function ChatWidget({ dealerName, slug }: ChatWidgetProps) {
         body: JSON.stringify({ messages: next, dealerName, slug }),
       });
       const data = await res.json() as { message?: string; error?: string };
-      const reply = data.message ?? "I'm sorry, I couldn't process that. Please call us or visit the dealership.";
+      const reply = data.message || "Chat is temporarily unavailable. Please call us or browse our inventory — we'd love to help!";
       setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
     } catch {
       setMessages((prev) => [...prev, {

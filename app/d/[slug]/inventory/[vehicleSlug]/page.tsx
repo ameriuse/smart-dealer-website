@@ -411,7 +411,25 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
                     className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                    {vehicle.dealer.phone}
+                    Call {vehicle.dealer.phone}
+                  </a>
+                )}
+                {vehicle.dealer.phone && (
+                  <a
+                    href={`sms:${vehicle.dealer.phone}`}
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                    Text Us
+                  </a>
+                )}
+                {vehicle.dealer.email && (
+                  <a
+                    href={`mailto:${vehicle.dealer.email}?subject=Interested in ${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    Email Us
                   </a>
                 )}
               </div>
@@ -422,11 +440,13 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
               )}
 
               {/* Lead Form */}
-              <LeadForm
-                slug={slug}
-                vehicleId={vehicle.id}
-                vehicleName={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
-              />
+              <div id="contact-form">
+                <LeadForm
+                  slug={slug}
+                  vehicleId={vehicle.id}
+                  vehicleName={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -435,29 +455,40 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
       {/* Mobile sticky bottom bar */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 z-40 shadow-lg">
         <div className="flex gap-2 max-w-md mx-auto">
-          {vehicle.dealer.phone && (
-            <a
-              href={`tel:${vehicle.dealer.phone}`}
-              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-green-600 text-white text-sm font-semibold"
+          {vehicle.dealer.phone ? (
+            <>
+              <a
+                href={`tel:${vehicle.dealer.phone}`}
+                className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-green-600 text-white text-sm font-semibold"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                Call
+              </a>
+              <a
+                href={`sms:${vehicle.dealer.phone}`}
+                className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-white text-sm font-semibold"
+                style={{ backgroundColor: 'var(--primary, #1d4ed8)' }}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                Text
+              </a>
+            </>
+          ) : (
+            <Link
+              href={`/d/${slug}/financing`}
+              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-white text-sm font-semibold"
+              style={{ backgroundColor: 'var(--primary, #1d4ed8)' }}
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-              Call
-            </a>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              Finance
+            </Link>
           )}
-          <Link
-            href={`/d/${slug}/financing`}
-            className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-white text-sm font-semibold"
-            style={{ backgroundColor: 'var(--primary, #1d4ed8)' }}
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            Finance
-          </Link>
           <a
-            href="#lead-form-mobile"
+            href="#contact-form"
             className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-gray-100 text-gray-700 text-sm font-semibold border border-gray-200"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-            Message
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            Schedule
           </a>
         </div>
       </div>

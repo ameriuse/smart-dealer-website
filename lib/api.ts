@@ -8,7 +8,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://smart-dealer-saas.ve
 export async function getDealer(slug: string): Promise<Dealer | null> {
   try {
     const res = await fetch(`${API_URL}/api/public/${slug}/dealer`, {
-      next: { revalidate: 300 },
+      next: { revalidate: 60 },
     });
     if (!res.ok) return null;
     return res.json() as Promise<Dealer>;
