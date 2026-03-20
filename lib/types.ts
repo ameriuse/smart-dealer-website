@@ -11,6 +11,11 @@ export type Dealer = {
   state?: string | null;
   showPricing: boolean;
   vehicleCount: number;
+  websiteConfig?: {
+    primaryColor: string;
+    secondaryColor: string;
+    templateId: string;
+  } | null;
 };
 
 export type VehicleInspection = {

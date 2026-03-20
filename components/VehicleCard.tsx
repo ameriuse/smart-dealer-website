@@ -56,7 +56,7 @@ export default function VehicleCard({ vehicle, slug, showPricing, priority = fal
           {vehicle.mainImageUrl ? (
             <Image
               src={vehicle.mainImageUrl}
-              alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+              alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}${vehicle.odometer != null ? ` — ${formatMileage(vehicle.odometer)}` : ''} for sale`}
               fill
               priority={priority}
               className="object-cover group-hover:scale-105 transition-transform duration-300"
