@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getDealer, getVehicle } from '@/lib/api';
 import PhotoGallery from '@/components/PhotoGallery';
+import SpinViewer360 from '@/components/SpinViewer360';
 import FinanceCalculator from '@/components/FinanceCalculator';
 import LeadForm from '@/components/LeadForm';
 import ScoreRing from '@/components/ScoreRing';
@@ -121,6 +122,14 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
             <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
               <PhotoGallery photos={allPhotos} vehicleName={`${vehicle.year} ${vehicle.make} ${vehicle.model}`} />
             </div>
+
+            {/* 360° Spin Viewer */}
+            {vehicle.spinFrames && vehicle.spinFrames.length >= 12 && (
+              <SpinViewer360
+                frames={vehicle.spinFrames}
+                vehicleName={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+              />
+            )}
 
             {/* Vehicle title + price (mobile) */}
             <div className="lg:hidden bg-white rounded-xl shadow-sm border border-gray-200 p-5">

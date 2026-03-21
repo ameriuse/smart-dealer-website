@@ -116,6 +116,7 @@ export type VehicleListItem = {
 export type VehicleDetail = VehicleListItem & {
   description?: string | null;
   photos: Array<{ url: string; label?: string | null }>;
+  spinFrames?: Array<{ url: string; frameIndex: number }> | null;
   dealer: {
     name: string;
     phone?: string | null;
