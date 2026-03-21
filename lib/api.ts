@@ -1,4 +1,4 @@
-import type { Dealer, VehiclesResponse, VehicleDetail, LeadPayload, LeadResponse } from './types';
+import type { Dealer, VehiclesResponse, VehicleDetail, FeaturedVehiclesResponse, LeadPayload, LeadResponse } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://smart-dealer-saas.vercel.app';
 
@@ -52,6 +52,21 @@ export async function getVehicle(
     );
     if (!res.ok) return null;
     return res.json() as Promise<VehicleDetail>;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetches up to 6 featured vehicles (pinned or scored) for a dealer's homepage.
+ */
+export async function getFeaturedVehicles(slug: string): Promise<FeaturedVehiclesResponse | null> {
+  try {
+    const res = await fetch(`${API_URL}/api/public/${slug}/featured-vehicles`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return null;
+    return res.json() as Promise<FeaturedVehiclesResponse>;
   } catch {
     return null;
   }

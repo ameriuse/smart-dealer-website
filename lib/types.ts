@@ -1,3 +1,34 @@
+export type BusinessHour = {
+  dayOfWeek: number; // 0=Sun, 1=Mon, ... 6=Sat
+  isOpen: boolean;
+  openTime: string | null;
+  closeTime: string | null;
+};
+
+export type TrustPillar = {
+  icon: 'shield' | 'dollar' | 'payment' | 'star' | 'wrench' | 'handshake' | 'clock' | 'check';
+  title: string;
+  description: string;
+};
+
+export type HomepageSections = {
+  latestArrivals: boolean;
+  featuredInventory: boolean;
+  trustPillars: boolean;
+  shopByBudget: boolean;
+  browseByType: boolean;
+  dealerInfo: boolean;
+  finalCta: boolean;
+};
+
+export type SocialLinks = {
+  facebook?: string | null;
+  instagram?: string | null;
+  twitter?: string | null;
+  google?: string | null;
+  youtube?: string | null;
+};
+
 export type Dealer = {
   slug: string;
   name: string;
@@ -9,14 +40,31 @@ export type Dealer = {
   address?: string | null;
   city?: string | null;
   state?: string | null;
+  lotLat?: number | null;
+  lotLng?: number | null;
   showPricing: boolean;
   vehicleCount: number;
+  businessHours?: BusinessHour[];
   websiteConfig?: {
     primaryColor: string;
     secondaryColor: string;
     accentColor?: string | null;
     logoUrl?: string | null;
     templateId: string;
+    heroHeadline?: string | null;
+    heroSubheadline?: string | null;
+    footerText?: string | null;
+    showFinancing?: boolean;
+    showTestDrive?: boolean;
+    showTradeIn?: boolean;
+    showInsurance?: boolean;
+    chatWidgetEnabled?: boolean;
+    homepageSections?: HomepageSections | null;
+    featuredVehicleIds?: string[] | null;
+    trustPillars?: TrustPillar[] | null;
+    socialLinks?: SocialLinks | null;
+    seoTitle?: string | null;
+    seoDescription?: string | null;
   } | null;
 };
 
@@ -87,6 +135,11 @@ export type VehiclesResponse = {
     hasNextPage: boolean;
   };
   filters: Record<string, unknown>;
+};
+
+export type FeaturedVehiclesResponse = {
+  vehicles: VehicleListItem[];
+  pinned: boolean;
 };
 
 export type LeadPayload = {
