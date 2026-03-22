@@ -11,6 +11,8 @@ interface LeadFormProps {
   templateId?: string;
   /** Dealer phone — enables direct call/text links inside the form */
   dealerPhone?: string;
+  /** Source page for attribution — "vdp" | "contact" | "financing" | "trade-in" | "homepage" */
+  sourcePage?: 'vdp' | 'contact' | 'financing' | 'trade-in' | 'homepage';
 }
 
 type Tab = 'message' | 'testdrive' | 'offer';
@@ -62,7 +64,7 @@ const IconMail = () => (
  * - Submit label and contextual hints change with tab + contact preference.
  * - preferredContact is sent as a separate API field (not just embedded in notes).
  */
-export default function LeadForm({ slug, vehicleId, vehicleName, templateId, dealerPhone }: LeadFormProps) {
+export default function LeadForm({ slug, vehicleId, vehicleName, templateId, dealerPhone, sourcePage }: LeadFormProps) {
   const isLuxury = templateId === 'luxury';
   const isFinanceFirst = templateId === 'finance-first';
 
@@ -122,6 +124,7 @@ export default function LeadForm({ slug, vehicleId, vehicleName, templateId, dea
         phone: phone.trim(),
         notes: message.trim(),
         preferredContact: contactPref,
+        sourcePage,
         vehicleId,
         type: 'GENERAL',
       });
@@ -174,6 +177,7 @@ export default function LeadForm({ slug, vehicleId, vehicleName, templateId, dea
         lastName: nameParts.slice(1).join(' ') || '',
         email: offerEmail.trim(),
         notes: `OFFER: $${offerPrice}. ${offerNote}`.trim(),
+        sourcePage,
         vehicleId,
         type: 'OFFER',
       });

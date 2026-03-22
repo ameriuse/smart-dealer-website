@@ -73,6 +73,7 @@ export default async function FinancingPage({ params }: FinancingPageProps) {
             <LeadForm
               slug={slug}
               vehicleName="Financing Inquiry"
+              sourcePage="financing"
             />
           </div>
         </div>

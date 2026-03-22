@@ -150,6 +150,7 @@ export type LeadPayload = {
   phone?: string;
   notes?: string;
   preferredContact?: 'call' | 'text' | 'email';
+  sourcePage?: 'vdp' | 'contact' | 'financing' | 'trade-in' | 'homepage';
   vehicleId?: string;
   type?: string;
 };

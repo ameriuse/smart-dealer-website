@@ -116,7 +116,7 @@ export default async function TradeInPage({ params }: TradeInPageProps) {
           <div>
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
               <h2 className="text-base font-bold text-gray-900 mb-4">Get Your Trade-In Value</h2>
-              <LeadForm slug={slug} vehicleName="Trade-In Inquiry" />
+              <LeadForm slug={slug} vehicleName="Trade-In Inquiry" sourcePage="trade-in" />
             </div>
           </div>
         </div>

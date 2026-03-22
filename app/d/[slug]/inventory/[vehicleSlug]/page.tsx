@@ -375,6 +375,7 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
                 vehicleName={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
                 templateId={template.id}
                 dealerPhone={vehicle.dealer.phone ?? undefined}
+                sourcePage="vdp"
               />
             </div>
           </div>

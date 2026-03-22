@@ -118,7 +118,7 @@ export default async function ContactPage({ params }: ContactPageProps) {
 
           {/* Contact Form */}
           <div>
-            <LeadForm slug={slug} vehicleName="General Inquiry" />
+            <LeadForm slug={slug} vehicleName="General Inquiry" sourcePage="contact" />
           </div>
         </div>
       </div>
