@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import MobileMenu from './MobileMenu';
 import ChatWidget from '@/components/ChatWidget';
 import DarkModeToggle from '@/components/DarkModeToggle';
+import { resolveTemplate } from '@/lib/templates/registry';
 
 interface DealerLayoutProps {
   children: React.ReactNode;
@@ -48,49 +49,52 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
     .filter(Boolean)
     .join(', ');
 
-  // Template-aware CSS variables
+  // ── Template resolution (single source of truth) ──────────────────────────
   const cfg = dealer.websiteConfig;
-  const templateId = cfg?.templateId ?? 'classic';
+  const template = resolveTemplate(cfg?.templateId);
+
   const primaryColor = cfg?.primaryColor ?? '#1d4ed8';
   const secondaryColor = cfg?.secondaryColor ?? '#1e40af';
   const accentColor = cfg?.accentColor ?? '#3B82F6';
   const displayLogoUrl = cfg?.logoUrl || dealer.logoUrl;
 
-  // Luxury template: fixed dark/gold palette
+  // CSS variables: use template override (PRISM fixed gold) or dealer config colors
   const cssVars =
-    templateId === 'luxury'
-      ? `--primary: #c9a84c; --secondary: #a8852b; --accent: #c9a84c; --primary-foreground: #0a0a0a; --bg: #0a0a0a; --surface: #1a1a1a; --text: #f5f5f5;`
-      : templateId === 'modern'
-      ? `--primary: ${primaryColor}; --secondary: ${secondaryColor}; --accent: ${accentColor}; --primary-foreground: #ffffff; --bg: #f8fafc; --surface: #ffffff; --text: #0f172a;`
-      : `--primary: ${primaryColor}; --secondary: ${secondaryColor}; --accent: ${accentColor}; --primary-foreground: #ffffff; --bg: #ffffff; --surface: #f8fafc; --text: #0f172a;`;
+    template.theme.cssVarsOverride ??
+    `--primary: ${primaryColor}; --secondary: ${secondaryColor}; --accent: ${accentColor}; --primary-foreground: #ffffff; --bg: #ffffff; --surface: #f8fafc; --text: #0f172a;`;
 
-  const isClassic = templateId === 'classic';
-  const isLuxury = templateId === 'luxury';
+  // ── Header class resolution ────────────────────────────────────────────────
+  const headerClass =
+    template.theme.headerBg === 'dark'
+      ? `border-b sticky top-0 z-50 ${template.theme.headerExtraBorderClass}`
+      : template.theme.headerBg === 'primary'
+      ? `sticky top-0 z-50 shadow-sm ${template.theme.headerExtraBorderClass}`
+      : `bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 shadow-sm ${template.theme.headerExtraBorderClass}`.trim();
 
-  const headerClass = isLuxury
-    ? 'border-b border-[#333333] sticky top-0 z-50'
-    : 'bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 shadow-sm';
+  // ── Nav/logo/phone styling ─────────────────────────────────────────────────
+  const navLinkClass =
+    template.theme.navStyle === 'white-on-primary'
+      ? 'px-4 py-2 rounded-md text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors'
+      : template.theme.navStyle === 'gold-on-dark'
+      ? 'px-4 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-[#c9a84c] transition-colors'
+      : 'px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors';
 
-  const navLinkClass = isClassic
-    ? 'px-4 py-2 rounded-md text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors'
-    : isLuxury
-    ? 'px-4 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-[#c9a84c] transition-colors'
-    : 'px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors';
-
-  const logoTextClass = isClassic
+  const logoTextClass = template.theme.logoOnDark
     ? 'text-lg font-bold text-white truncate max-w-[200px]'
     : 'text-lg font-bold text-gray-900 dark:text-white truncate max-w-[200px]';
 
-  const phoneClass = isClassic
+  const phoneClass = template.theme.phoneOnDark
     ? 'flex items-center gap-2 text-sm font-semibold text-white/90 hover:text-white transition-colors whitespace-nowrap'
     : 'flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-gray-900 transition-colors whitespace-nowrap';
 
+  const phoneIconClass = `w-4 h-4 flex-shrink-0 ${template.theme.phoneOnDark ? 'text-white/60' : 'text-gray-400'}`;
+
   return (
-    <div className={`template-${templateId}`}>
+    <div className={`template-${template.id}`}>
       <style>{`:root { ${cssVars} }`}</style>
 
-      {/* Luxury template: inject dark mode class immediately */}
-      {templateId === 'luxury' && (
+      {/* Dark mode injection (PRISM only) */}
+      {template.theme.dark && (
         <script
           dangerouslySetInnerHTML={{
             __html: `document.documentElement.classList.add('dark');`,
@@ -101,7 +105,7 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
       {/* ── Header ── */}
       <header
         className={headerClass}
-        style={isClassic ? { backgroundColor: 'var(--primary)' } : undefined}
+        style={template.theme.headerBg === 'primary' ? { backgroundColor: 'var(--primary)' } : undefined}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16 gap-3">
@@ -139,27 +143,37 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
               <DarkModeToggle />
               {dealer.phone && (
                 <a href={`tel:${dealer.phone}`} className={phoneClass}>
-                  <svg className={`w-4 h-4 flex-shrink-0 ${isClassic ? 'text-white/60' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className={phoneIconClass} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
                   {dealer.phone}
                 </a>
               )}
-              {isClassic ? (
+
+              {/* Header CTA — driven by template.nav */}
+              {template.nav.ctaVariant === 'inverse' ? (
                 <Link
-                  href={`/d/${slug}/financing`}
+                  href={`/d/${slug}/${template.nav.ctaPath}`}
                   className="px-4 py-2.5 rounded-lg text-sm font-semibold bg-white transition-all hover:bg-gray-100 whitespace-nowrap"
                   style={{ color: 'var(--primary)' }}
                 >
-                  Get Pre-Approved
+                  {template.nav.ctaLabel}
+                </Link>
+              ) : template.nav.ctaVariant === 'green-pulse' ? (
+                <Link
+                  href={`/d/${slug}/${template.nav.ctaPath}`}
+                  className="px-4 py-2.5 rounded-lg text-sm font-bold text-white transition-all hover:brightness-90 whitespace-nowrap"
+                  style={{ backgroundColor: 'var(--primary, #1d4ed8)' }}
+                >
+                  {template.nav.ctaLabel}
                 </Link>
               ) : (
                 <Link
-                  href={`/d/${slug}/financing`}
+                  href={`/d/${slug}/${template.nav.ctaPath}`}
                   className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:brightness-90 whitespace-nowrap"
                   style={{ backgroundColor: 'var(--primary, #1d4ed8)' }}
                 >
-                  Get Pre-Approved
+                  {template.nav.ctaLabel}
                 </Link>
               )}
             </div>
@@ -286,7 +300,7 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
               </div>
             )}
 
-            {/* CTA */}
+            {/* Footer CTA */}
             <div>
               <h3 className="text-xs font-semibold text-white uppercase tracking-widest mb-4">Get Started</h3>
               <div className="space-y-2.5">

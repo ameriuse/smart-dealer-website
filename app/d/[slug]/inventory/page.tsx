@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { getDealer, getVehicles } from '@/lib/api';
 import VehicleCard from '@/components/VehicleCard';
 import FilterSidebar from '@/components/FilterSidebar';
+import { resolveTemplate } from '@/lib/templates/registry';
 
 interface SRPProps {
   params: { slug: string };
@@ -43,6 +44,15 @@ function buildUrl(slug: string, searchParams: Record<string, string | undefined>
   return `/d/${slug}/inventory${qs ? '?' + qs : ''}`;
 }
 
+// Monthly budget ranges used by the Finance-First budget bar above the grid
+const MONTHLY_BUDGETS = [
+  { label: 'Under $200/mo', priceMax: '12000' },
+  { label: '$200–$350/mo', priceMin: '12000', priceMax: '21000' },
+  { label: '$350–$500/mo', priceMin: '21000', priceMax: '30000' },
+  { label: '$500–$700/mo', priceMin: '30000', priceMax: '42000' },
+  { label: '$700+/mo', priceMin: '42000' },
+];
+
 export default async function InventoryPage({ params, searchParams }: SRPProps) {
   const { slug } = params;
 
@@ -51,6 +61,7 @@ export default async function InventoryPage({ params, searchParams }: SRPProps) 
     page: searchParams.page ?? '1',
     sort: searchParams.sort ?? 'newest',
   };
+
   if (searchParams.make) apiParams.make = searchParams.make;
   if (searchParams.model) apiParams.model = searchParams.model;
   if (searchParams.priceMin) apiParams.priceMin = searchParams.priceMin;
@@ -65,6 +76,9 @@ export default async function InventoryPage({ params, searchParams }: SRPProps) 
   ]);
 
   if (!dealer) notFound();
+
+  // ── Template resolution ────────────────────────────────────────────────────
+  const template = resolveTemplate(dealer.websiteConfig?.templateId);
 
   const vehicles = vehiclesData?.vehicles ?? [];
   const pagination = vehiclesData?.pagination;
@@ -87,9 +101,14 @@ export default async function InventoryPage({ params, searchParams }: SRPProps) 
   }
   if (searchParams.scoreMin) activeFilters.push({ label: 'OBD Verified', clearKey: 'scoreMin' });
 
+  // Grid class: 2-col (PRISM, SHIFT) or 3-col (APEX, Finance-First)
+  const gridClass = template.srp.gridCols === 2
+    ? 'grid grid-cols-1 sm:grid-cols-2 gap-6'
+    : 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5';
+
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* Page Header */}
+      {/* ── Page Header ── */}
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {/* Breadcrumb */}
@@ -172,12 +191,50 @@ export default async function InventoryPage({ params, searchParams }: SRPProps) 
         </div>
       </div>
 
-      {/* Main content: sidebar + grid */}
+      {/* ── Finance-First: Monthly Budget Bar above grid ── */}
+      {template.srp.showBudgetBar && (
+        <div className="bg-white border-b border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-sm font-semibold text-gray-700 whitespace-nowrap">Monthly Budget:</span>
+              {MONTHLY_BUDGETS.map((range) => {
+                const isActive =
+                  (searchParams.priceMin ?? '') === (range.priceMin ?? '') &&
+                  (searchParams.priceMax ?? '') === (range.priceMax ?? '');
+                const overrides: Record<string, string | undefined> = {
+                  priceMin: range.priceMin,
+                  priceMax: range.priceMax,
+                  page: undefined,
+                };
+                return (
+                  <Link
+                    key={range.label}
+                    href={isActive
+                      ? buildUrl(slug, searchParams as Record<string, string | undefined>, { priceMin: undefined, priceMax: undefined, page: undefined })
+                      : buildUrl(slug, searchParams as Record<string, string | undefined>, overrides)
+                    }
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
+                      isActive
+                        ? 'text-white border-transparent'
+                        : 'text-gray-600 bg-white border-gray-200 hover:border-green-400 hover:text-green-700'
+                    }`}
+                    style={isActive ? { backgroundColor: 'var(--primary, #1d4ed8)' } : {}}
+                  >
+                    {range.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Main content: sidebar + grid ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex gap-6">
 
-          {/* Filter Sidebar — includes mobile drawer */}
-          <FilterSidebar slug={slug} totalCount={totalCount} />
+          {/* Filter Sidebar — shown per template.srp.showSidebar */}
+          {template.srp.showSidebar && <FilterSidebar slug={slug} totalCount={totalCount} />}
 
           {/* Vehicle Grid */}
           <div className="flex-1 min-w-0">
@@ -196,7 +253,8 @@ export default async function InventoryPage({ params, searchParams }: SRPProps) 
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                {/* Vehicle grid — cols driven by template.srp.gridCols */}
+                <div className={gridClass}>
                   {vehicles.map((vehicle, i) => (
                     <VehicleCard
                       key={vehicle.id}

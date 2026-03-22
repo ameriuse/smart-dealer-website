@@ -7,6 +7,7 @@ import FinanceCalculator from '@/components/FinanceCalculator';
 import LeadForm from '@/components/LeadForm';
 import ScoreRing from '@/components/ScoreRing';
 import type { Metadata } from 'next';
+import { resolveTemplate } from '@/lib/templates/registry';
 
 interface VDPProps {
   params: { slug: string; vehicleSlug: string };
@@ -63,6 +64,9 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
 
   if (!dealer || !vehicle) notFound();
 
+  // ── Single template resolution — no scattered booleans ────────────────────
+  const template = resolveTemplate(dealer.websiteConfig?.templateId);
+
   const inspection = vehicle.inspection;
   const score = inspection?.overallScore;
   const obdCodes = inspection?.obd?.codes ?? [];
@@ -79,12 +83,11 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
   const scoreColor = inspection?.scoreColor ?? 'gray';
   const scoreHex = scoreColorMap[scoreColor];
 
-  // Score label
   const scoreLabel = score != null
     ? score >= 75 ? 'Good Condition' : score >= 50 ? 'Fair Condition' : 'Needs Attention'
     : null;
 
-  // Monthly payment (60mo @ 6.9% APR)
+  // Monthly payment estimate (60mo @ 6.9% APR)
   const monthlyPayment = vehicle.price
     ? Math.round((vehicle.price * (0.069 / 12) * Math.pow(1 + 0.069 / 12, 60)) / (Math.pow(1 + 0.069 / 12, 60) - 1))
     : null;
@@ -94,6 +97,13 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
   vehicle.photos?.forEach((p) => {
     if (p.url !== vehicle.mainImageUrl) allPhotos.push(p);
   });
+
+  // ── PRISM: primary CTA color is gold, not brand blue ──────────────────────
+  const prismGold = '#c9a84c';
+  const primaryCtaStyle: React.CSSProperties =
+    template.id === 'luxury'
+      ? { backgroundColor: prismGold, color: '#0a0a0a' }
+      : { backgroundColor: 'var(--primary, #1d4ed8)', color: '#ffffff' };
 
   return (
     <div className="bg-[#F8F9FA] min-h-screen">
@@ -118,12 +128,12 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
           {/* ── LEFT COLUMN ── */}
           <div className="flex-1 min-w-0 space-y-6">
 
-            {/* Gallery */}
+            {/* Gallery — unchanged across all templates */}
             <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
               <PhotoGallery photos={allPhotos} vehicleName={`${vehicle.year} ${vehicle.make} ${vehicle.model}`} />
             </div>
 
-            {/* 360° Spin Viewer */}
+            {/* 360° Spin Viewer — unchanged across all templates */}
             {vehicle.spinFrames && vehicle.spinFrames.length >= 12 && (
               <SpinViewer360
                 frames={vehicle.spinFrames}
@@ -141,12 +151,15 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
                   <div className="text-3xl font-bold tabular-nums" style={{ color: 'var(--primary, #1d4ed8)' }}>
                     {formatPrice(vehicle.price)}
                   </div>
-                  {monthlyPayment && (
+                  {monthlyPayment && template.id !== 'luxury' && (
                     <p className="text-sm text-gray-500 mt-1">
                       Est. <span className="font-semibold">${monthlyPayment.toLocaleString()}/mo</span> for 60 months
                     </p>
                   )}
                 </div>
+              )}
+              {template.id === 'luxury' && vehicle.price == null && (
+                <p className="text-gray-500 italic text-sm mt-2">Price on request</p>
               )}
               <div className="flex flex-wrap gap-3 mt-3 text-sm text-gray-500">
                 {vehicle.odometer != null && (
@@ -159,7 +172,7 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
               </div>
             </div>
 
-            {/* ── CONDITION REPORT ── */}
+            {/* ── CONDITION REPORT — unchanged across all templates ── */}
             {inspection && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
@@ -174,7 +187,6 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
                 </div>
 
                 <div className="p-5">
-                  {/* Overall score ring */}
                   {score != null && (
                     <div className="flex items-center gap-6 mb-6">
                       <ScoreRing score={score} color={scoreHex} label={scoreLabel} />
@@ -190,7 +202,6 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
                     </div>
                   )}
 
-                  {/* Category breakdown */}
                   {scoreBreakdown && Object.keys(scoreBreakdown).length > 0 && (
                     <div className="mb-5 space-y-3">
                       {Object.entries(scoreBreakdown).map(([key, val]) => {
@@ -211,7 +222,6 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
                     </div>
                   )}
 
-                  {/* R/Y/G counts */}
                   {(inspection.greenCount != null || inspection.yellowCount != null || inspection.redCount != null) && (
                     <div className="grid grid-cols-3 gap-3 mb-5">
                       <div className="text-center p-3 rounded-xl bg-green-50 border border-green-100">
@@ -229,7 +239,6 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
                     </div>
                   )}
 
-                  {/* Status checklist */}
                   <div className="space-y-2.5 border-t border-gray-100 pt-4">
                     <div className={`flex items-center gap-3 text-sm font-medium ${obdCodes.length === 0 ? 'text-green-700' : 'text-amber-700'}`}>
                       <span className="text-base">{obdCodes.length === 0 ? '✅' : '⚠️'}</span>
@@ -254,7 +263,7 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
               </div>
             )}
 
-            {/* OBD Codes */}
+            {/* OBD Codes — unchanged */}
             {obdCodes.length > 0 && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-100 bg-amber-50">
@@ -284,7 +293,7 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
               </div>
             )}
 
-            {/* NHTSA Recalls */}
+            {/* NHTSA Recalls — unchanged */}
             {recalls && recalls.count > 0 && recalls.campaigns && recalls.campaigns.length > 0 && (
               <div className="bg-white rounded-xl shadow-sm border border-red-200 overflow-hidden">
                 <div className="px-5 py-4 border-b border-red-100 bg-red-50">
@@ -316,7 +325,7 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
               </div>
             )}
 
-            {/* Vehicle Details */}
+            {/* Vehicle Details — unchanged */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="px-5 py-4 border-b border-gray-100">
                 <h2 className="text-base font-bold text-gray-900">Vehicle Details</h2>
@@ -340,7 +349,7 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
               </div>
             </div>
 
-            {/* Description */}
+            {/* Description — unchanged */}
             {vehicle.description && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
                 <h2 className="text-base font-bold text-gray-900 mb-3">About This Vehicle</h2>
@@ -348,15 +357,18 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
               </div>
             )}
 
-            {/* Finance Calculator (mobile only) */}
+            {/* Finance Calculator (mobile only) — hidden for PRISM */}
             <div className="lg:hidden">
-              {dealer.showPricing && vehicle.price != null && (
+              {template.vdp.calculatorPosition !== 'none' && dealer.showPricing && vehicle.price != null && (
                 <FinanceCalculator price={vehicle.price} slug={slug} />
               )}
             </div>
 
             {/* Lead Form (mobile only) */}
             <div className="lg:hidden pb-24">
+              {template.vdp.leadFormNote && (
+                <p className="text-sm text-gray-500 mb-3 px-1">{template.vdp.leadFormNote}</p>
+              )}
               <LeadForm
                 slug={slug}
                 vehicleId={vehicle.id}
@@ -376,18 +388,26 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
                 </h1>
                 {dealer.showPricing && vehicle.price != null ? (
                   <>
-                    <div className="text-3xl font-bold tabular-nums mb-1" style={{ color: 'var(--primary, #1d4ed8)' }}>
+                    <div
+                      className="text-3xl font-bold tabular-nums mb-1"
+                      style={{ color: template.id === 'luxury' ? '#c9a84c' : 'var(--primary, #1d4ed8)' }}
+                    >
                       {formatPrice(vehicle.price)}
                     </div>
-                    {monthlyPayment && (
+                    {/* Monthly payment: shown for all except PRISM */}
+                    {monthlyPayment && template.id !== 'luxury' && (
                       <p className="text-sm text-gray-500">
                         Est. <span className="font-semibold text-gray-700">${monthlyPayment.toLocaleString()}/mo</span> · 60 mo @ 6.9% APR
                       </p>
                     )}
-                    <p className="text-xs text-gray-400 mt-1">+ tax, title, license</p>
+                    {template.id !== 'luxury' && (
+                      <p className="text-xs text-gray-400 mt-1">+ tax, title, license</p>
+                    )}
                   </>
                 ) : (
-                  <p className="text-gray-500 italic text-sm">Price on request</p>
+                  <p className="text-gray-500 italic text-sm">
+                    {template.id === 'luxury' ? 'Price available upon inquiry' : 'Price on request'}
+                  </p>
                 )}
                 {vehicle.odometer != null && (
                   <div className="flex items-center gap-1.5 mt-3 text-sm text-gray-500">
@@ -397,59 +417,126 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
                 )}
               </div>
 
-              {/* Action buttons */}
+              {/* Finance-First: calculator BEFORE action buttons */}
+              {template.vdp.calculatorPosition === 'top' && dealer.showPricing && vehicle.price != null && (
+                <FinanceCalculator price={vehicle.price} slug={slug} />
+              )}
+
+              {/* ── ACTION BUTTONS — template-driven ── */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 space-y-2.5">
-                <Link
-                  href={`/d/${slug}/financing`}
-                  className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold text-white transition-colors"
-                  style={{ backgroundColor: 'var(--primary, #1d4ed8)' }}
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  Apply for Financing
-                </Link>
-                <Link
-                  href={`/d/${slug}/trade-in`}
-                  className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
-                  Get Trade-In Value
-                </Link>
-                {vehicle.dealer.phone && (
-                  <a
-                    href={`tel:${vehicle.dealer.phone}`}
-                    className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                    Call {vehicle.dealer.phone}
-                  </a>
-                )}
-                {vehicle.dealer.phone && (
-                  <a
-                    href={`sms:${vehicle.dealer.phone}`}
-                    className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-                    Text Us
-                  </a>
-                )}
-                {vehicle.dealer.email && (
-                  <a
-                    href={`mailto:${vehicle.dealer.email}?subject=Interested in ${vehicle.year} ${vehicle.make} ${vehicle.model}`}
-                    className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                    Email Us
-                  </a>
+                {template.vdp.ctaSet === 'inquiry-only' ? (
+                  // ── PRISM: inquiry-focused CTAs, no finance, no trade-in ──
+                  <>
+                    {/* Primary: Schedule a Showing */}
+                    <Link
+                      href={`/d/${slug}/contact`}
+                      className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold transition-colors"
+                      style={primaryCtaStyle}
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      {template.vdp.primaryCtaLabel}
+                    </Link>
+
+                    {/* Secondary: Request Information (scroll to form) */}
+                    <a
+                      href="#contact-form"
+                      className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                      Request Information
+                    </a>
+
+                    {/* Call — always shown for PRISM if phone available */}
+                    {vehicle.dealer.phone && (
+                      <a
+                        href={`tel:${vehicle.dealer.phone}`}
+                        className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                        Call {vehicle.dealer.phone}
+                      </a>
+                    )}
+
+                    {/* Email — for PRISM, shown instead of Text */}
+                    {vehicle.dealer.email && (
+                      <a
+                        href={`mailto:${vehicle.dealer.email}?subject=Inquiry: ${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+                        className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                        Email Our Team
+                      </a>
+                    )}
+                  </>
+                ) : (
+                  // ── APEX, SHIFT, Finance-First: full CTA set ──
+                  <>
+                    {/* Primary: Apply for Financing / Get Pre-Approved / Apply in 60s */}
+                    <Link
+                      href={`/d/${slug}/financing`}
+                      className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold text-white transition-colors"
+                      style={{ backgroundColor: 'var(--primary, #1d4ed8)' }}
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      {template.vdp.primaryCtaLabel}
+                    </Link>
+
+                    {/* Trade-in: shown per template config */}
+                    {template.vdp.showTradeInButton && (
+                      <Link
+                        href={`/d/${slug}/trade-in`}
+                        className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
+                        Get Trade-In Value
+                      </Link>
+                    )}
+
+                    {vehicle.dealer.phone && (
+                      <a
+                        href={`tel:${vehicle.dealer.phone}`}
+                        className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                        Call {vehicle.dealer.phone}
+                      </a>
+                    )}
+                    {vehicle.dealer.phone && (
+                      <a
+                        href={`sms:${vehicle.dealer.phone}`}
+                        className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                        Text Us
+                      </a>
+                    )}
+                    {vehicle.dealer.email && (
+                      <a
+                        href={`mailto:${vehicle.dealer.email}?subject=Interested in ${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+                        className="flex items-center justify-center gap-2 w-full py-3 rounded-lg text-sm font-semibold text-gray-700 bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                        Email Us
+                      </a>
+                    )}
+                  </>
                 )}
               </div>
 
-              {/* Finance Calculator */}
-              {dealer.showPricing && vehicle.price != null && (
+              {/* Finance Calculator (bottom placement — APEX and SHIFT only) */}
+              {template.vdp.calculatorPosition === 'bottom' && dealer.showPricing && vehicle.price != null && (
                 <FinanceCalculator price={vehicle.price} slug={slug} />
               )}
 
               {/* Lead Form */}
               <div id="contact-form">
+                {template.vdp.leadFormNote && (
+                  <p className="text-sm text-gray-500 mb-3 px-1">{template.vdp.leadFormNote}</p>
+                )}
                 <LeadForm
                   slug={slug}
                   vehicleId={vehicle.id}
@@ -461,44 +548,70 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
         </div>
       </div>
 
-      {/* Mobile sticky bottom bar */}
+      {/* ── Mobile sticky bottom bar — template-driven ── */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 z-40 shadow-lg">
         <div className="flex gap-2 max-w-md mx-auto">
-          {vehicle.dealer.phone ? (
+          {template.vdp.mobileBarVariant === 'inquiry' ? (
+            // PRISM mobile bar: Call + Inquire only
             <>
+              {vehicle.dealer.phone ? (
+                <a
+                  href={`tel:${vehicle.dealer.phone}`}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-green-600 text-white text-sm font-semibold"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                  Call
+                </a>
+              ) : null}
               <a
-                href={`tel:${vehicle.dealer.phone}`}
-                className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-green-600 text-white text-sm font-semibold"
+                href="#contact-form"
+                className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-sm font-semibold"
+                style={{ backgroundColor: '#c9a84c', color: '#0a0a0a' }}
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                Call
-              </a>
-              <a
-                href={`sms:${vehicle.dealer.phone}`}
-                className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-white text-sm font-semibold"
-                style={{ backgroundColor: 'var(--primary, #1d4ed8)' }}
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-                Text
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                Inquire
               </a>
             </>
           ) : (
-            <Link
-              href={`/d/${slug}/financing`}
-              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-white text-sm font-semibold"
-              style={{ backgroundColor: 'var(--primary, #1d4ed8)' }}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              Finance
-            </Link>
+            // Standard mobile bar: APEX, SHIFT, Finance-First
+            <>
+              {vehicle.dealer.phone ? (
+                <>
+                  <a
+                    href={`tel:${vehicle.dealer.phone}`}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-green-600 text-white text-sm font-semibold"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                    Call
+                  </a>
+                  <a
+                    href={`sms:${vehicle.dealer.phone}`}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-white text-sm font-semibold"
+                    style={{ backgroundColor: 'var(--primary, #1d4ed8)' }}
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                    Text
+                  </a>
+                </>
+              ) : (
+                <Link
+                  href={`/d/${slug}/financing`}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-white text-sm font-semibold"
+                  style={{ backgroundColor: 'var(--primary, #1d4ed8)' }}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  Finance
+                </Link>
+              )}
+              <a
+                href="#contact-form"
+                className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-gray-100 text-gray-700 text-sm font-semibold border border-gray-200"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                Schedule
+              </a>
+            </>
           )}
-          <a
-            href="#contact-form"
-            className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-gray-100 text-gray-700 text-sm font-semibold border border-gray-200"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-            Schedule
-          </a>
         </div>
       </div>
     </div>
