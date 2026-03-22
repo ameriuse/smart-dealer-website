@@ -149,6 +149,7 @@ export type LeadPayload = {
   email: string;
   phone?: string;
   notes?: string;
+  preferredContact?: 'call' | 'text' | 'email';
   vehicleId?: string;
   type?: string;
 };

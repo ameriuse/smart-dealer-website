@@ -1,15 +1,20 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { submitLead, submitAppointment } from '@/lib/api';
 
 interface LeadFormProps {
   slug: string;
   vehicleId?: string;
   vehicleName?: string;
+  /** Template ID — drives which tabs are shown and default messaging tone */
+  templateId?: string;
+  /** Dealer phone — enables direct call/text links inside the form */
+  dealerPhone?: string;
 }
 
 type Tab = 'message' | 'testdrive' | 'offer';
+type ContactPref = 'call' | 'text' | 'email';
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 
 const TIME_SLOTS = ['9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM'];
@@ -32,11 +37,35 @@ const IconTag = () => (
   </svg>
 );
 
+const IconPhone = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+  </svg>
+);
+
+const IconChat = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+  </svg>
+);
+
+const IconMail = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+  </svg>
+);
+
 /**
  * Tabbed lead capture form: Message Dealer, Schedule Test Drive, Make an Offer.
- * Submits to public API and shows success/error states.
+ * - PRISM template: hides "Make Offer" tab (inquiry-only).
+ * - Finance-First: pre-fills finance-oriented message.
+ * - Submit label and contextual hints change with tab + contact preference.
+ * - preferredContact is sent as a separate API field (not just embedded in notes).
  */
-export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps) {
+export default function LeadForm({ slug, vehicleId, vehicleName, templateId, dealerPhone }: LeadFormProps) {
+  const isLuxury = templateId === 'luxury';
+  const isFinanceFirst = templateId === 'finance-first';
+
   const [tab, setTab] = useState<Tab>('message');
   const [status, setStatus] = useState<Status>('idle');
   const [errorMsg, setErrorMsg] = useState('');
@@ -46,8 +75,12 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [message, setMessage] = useState(vehicleName ? `I'm interested in the ${vehicleName}.` : '');
-  const [contactPref, setContactPref] = useState<'call' | 'text' | 'email'>('call');
+  const [message, setMessage] = useState(() => {
+    if (isFinanceFirst && vehicleName) return `I'd like to get pre-approved for the ${vehicleName}.`;
+    if (vehicleName) return `I'm interested in the ${vehicleName}.`;
+    return '';
+  });
+  const [contactPref, setContactPref] = useState<ContactPref>('call');
 
   // Test drive form
   const [tdName, setTdName] = useState('');
@@ -61,6 +94,22 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
   const [offerPrice, setOfferPrice] = useState('');
   const [offerNote, setOfferNote] = useState('');
 
+  // ── Dynamic submit label ───────────────────────────────────────────────────
+  const submitLabel = useMemo(() => {
+    if (tab === 'testdrive') return 'Schedule Test Drive';
+    if (tab === 'offer') return 'Submit Offer';
+    if (contactPref === 'call') return 'Request a Callback';
+    if (contactPref === 'text') return 'Request a Text';
+    return 'Send Message';
+  }, [tab, contactPref]);
+
+  // ── Contextual hint below preferred contact ────────────────────────────────
+  const contactHint: Record<ContactPref, string> = {
+    call: "We'll call you back as soon as possible",
+    text: "We'll send you a text message",
+    email: "We'll reply to your email address",
+  };
+
   const handleMessageSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('submitting');
@@ -71,7 +120,8 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
         lastName: lastName.trim(),
         email: email.trim(),
         phone: phone.trim(),
-        notes: `[Contact: ${contactPref}] ${message.trim()}`,
+        notes: message.trim(),
+        preferredContact: contactPref,
         vehicleId,
         type: 'GENERAL',
       });
@@ -147,13 +197,17 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
           </svg>
         </div>
         <h3 className="text-lg font-bold text-gray-900 mb-2">
-          {tab === 'testdrive' ? 'Test Drive Requested!' : tab === 'offer' ? 'Offer Submitted!' : 'Message Sent!'}
+          {tab === 'testdrive' ? 'Test Drive Requested!' : tab === 'offer' ? 'Offer Submitted!' : 'Request Sent!'}
         </h3>
         <p className="text-sm text-gray-500 mb-5">
           {tab === 'testdrive'
             ? "We'll confirm your appointment within 2 hours."
             : tab === 'offer'
             ? "We'll review your offer and get back to you soon."
+            : contactPref === 'call'
+            ? "We'll call you back as soon as possible."
+            : contactPref === 'text'
+            ? "We'll send you a text message shortly."
             : "We'll be in touch within a few hours."}
         </p>
         <button
@@ -168,10 +222,11 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
     );
   }
 
-  const tabs: Array<{ id: Tab; label: string; Icon: () => JSX.Element }> = [
-    { id: 'message', label: 'Message', Icon: IconMessage },
-    { id: 'testdrive', label: 'Test Drive', Icon: IconCalendar },
-    { id: 'offer', label: 'Make Offer', Icon: IconTag },
+  // ── Tab list — PRISM hides "Make Offer" (inquiry-only template) ─────────────
+  const availableTabs: Array<{ id: Tab; label: string; Icon: () => JSX.Element }> = [
+    { id: 'message',   label: isFinanceFirst ? 'Get Approved' : 'Message',    Icon: isFinanceFirst ? IconPhone : IconMessage },
+    { id: 'testdrive', label: 'Test Drive',  Icon: IconCalendar },
+    ...(!isLuxury ? [{ id: 'offer' as Tab, label: 'Make Offer', Icon: IconTag }] : []),
   ];
 
   const inputClass = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors";
@@ -181,7 +236,7 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       {/* Tab navigation */}
       <div className="flex border-b border-gray-100">
-        {tabs.map((t) => (
+        {availableTabs.map((t) => (
           <button
             key={t.id}
             type="button"
@@ -200,9 +255,15 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
       </div>
 
       <div className="p-5">
-        {/* ── Message Tab ── */}
+        {/* ── Message / Get Approved Tab ── */}
         {tab === 'message' && (
           <form onSubmit={handleMessageSubmit} className="space-y-3">
+            {isFinanceFirst && (
+              <div className="p-3 bg-green-50 rounded-xl border border-green-200 text-sm font-medium text-green-800">
+                ✓ No hard credit pull required — takes 60 seconds
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={labelClass} htmlFor="firstName">First Name *</label>
@@ -235,27 +296,58 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
                 className={`${inputClass} resize-none`} placeholder="I'm interested in this vehicle..." />
             </div>
 
-            {/* Preferred Contact */}
+            {/* Preferred Contact — now with action links when dealer phone is available */}
             <div>
-              <label className={labelClass}>Preferred Contact</label>
+              <label className={labelClass}>How should we contact you?</label>
               <div className="flex gap-2">
-                {(['call', 'text', 'email'] as const).map((pref) => (
+                {([
+                  { pref: 'call' as ContactPref, label: 'Call Me',  Icon: IconPhone },
+                  { pref: 'text' as ContactPref, label: 'Text Me',  Icon: IconChat },
+                  { pref: 'email' as ContactPref, label: 'Email Me', Icon: IconMail },
+                ]).map(({ pref, label, Icon }) => (
                   <button
                     key={pref}
                     type="button"
                     onClick={() => setContactPref(pref)}
-                    className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all border capitalize ${
+                    className={`flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
                       contactPref === pref
                         ? 'text-white border-transparent shadow-sm'
                         : 'text-gray-600 border-gray-200 bg-white hover:border-gray-300'
                     }`}
                     style={contactPref === pref ? { backgroundColor: 'var(--primary)', borderColor: 'var(--primary)' } : {}}
                   >
-                    {pref === 'call' ? 'Call' : pref === 'text' ? 'Text' : 'Email'}
+                    <Icon />
+                    {label}
                   </button>
                 ))}
               </div>
+              {/* Contextual hint */}
+              <p className="text-xs text-gray-400 mt-1.5 text-center">{contactHint[contactPref]}</p>
             </div>
+
+            {/* Direct action shortcuts when dealer phone is known */}
+            {dealerPhone && (contactPref === 'call' || contactPref === 'text') && (
+              <div className="flex gap-2 pt-1">
+                {contactPref === 'call' && (
+                  <a
+                    href={`tel:${dealerPhone}`}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 transition-colors"
+                  >
+                    <IconPhone />
+                    Call Now: {dealerPhone}
+                  </a>
+                )}
+                {contactPref === 'text' && (
+                  <a
+                    href={`sms:${dealerPhone}`}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-colors"
+                  >
+                    <IconChat />
+                    Text Now: {dealerPhone}
+                  </a>
+                )}
+              </div>
+            )}
 
             {errorMsg && (
               <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{errorMsg}</p>
@@ -269,7 +361,7 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>Sending...</>
-              ) : 'Send Message'}
+              ) : submitLabel}
             </button>
 
             <p className="text-xs text-gray-400 text-center">
@@ -338,8 +430,8 @@ export default function LeadForm({ slug, vehicleId, vehicleName }: LeadFormProps
           </form>
         )}
 
-        {/* ── Make Offer Tab ── */}
-        {tab === 'offer' && (
+        {/* ── Make Offer Tab — hidden for PRISM ── */}
+        {tab === 'offer' && !isLuxury && (
           <form onSubmit={handleOfferSubmit} className="space-y-3">
             {vehicleName && (
               <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 text-sm font-medium text-amber-800">

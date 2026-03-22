@@ -373,6 +373,8 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
                 slug={slug}
                 vehicleId={vehicle.id}
                 vehicleName={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+                templateId={template.id}
+                dealerPhone={vehicle.dealer.phone ?? undefined}
               />
             </div>
           </div>
@@ -541,6 +543,8 @@ export default async function VehicleDetailPage({ params }: VDPProps) {
                   slug={slug}
                   vehicleId={vehicle.id}
                   vehicleName={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+                  templateId={template.id}
+                  dealerPhone={vehicle.dealer.phone ?? undefined}
                 />
               </div>
             </div>
