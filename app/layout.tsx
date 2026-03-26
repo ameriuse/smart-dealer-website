@@ -2,9 +2,13 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Dealer Inventory',
-  description: 'Browse quality used vehicles.',
+  title: {
+    default: 'Ameriuse — Dealership Operating System',
+    template: '%s — Ameriuse',
+  },
+  description: 'The all-in-one platform for independent auto dealers. CRM, website builder, inventory, messaging, inspections, GPS — unified in a single system.',
   robots: 'index, follow',
+  metadataBase: new URL('https://ameriuse.com'),
 };
 
 export default function RootLayout({
