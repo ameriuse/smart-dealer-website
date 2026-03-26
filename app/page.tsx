@@ -2,20 +2,20 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Ameriuse — Dealership Operating System',
+  title: 'Ameriuse — The Operating System for Independent Dealers',
   description:
-    'The all-in-one platform for independent auto dealers. CRM, website builder, inventory management, messaging, inspections, GPS tracking, and more — unified in a single system.',
+    'Stop juggling 6 different tools. Ameriuse unifies CRM, inventory, website, messaging, inspections, and GPS into one platform built for independent auto dealers.',
   openGraph: {
-    title: 'Ameriuse — Dealership Operating System',
+    title: 'Ameriuse — The Operating System for Independent Dealers',
     description:
-      'Run your entire dealership from one platform. CRM, website builder, listing feeds, messaging, inspections, and GPS — all connected.',
+      'One platform replaces your CRM, DMS, website builder, messaging tool, inspection app, and GPS tracker. Built for independent and BHPH dealers.',
     url: 'https://ameriuse.com',
     siteName: 'Ameriuse',
     type: 'website',
   },
 };
 
-/* ── Inline SVG icons (no external deps) ──────────────────────────── */
+/* ── Inline SVG icons ──────────────────────────────────────────────── */
 
 function IconUsers() {
   return (
@@ -118,54 +118,69 @@ function IconCheck() {
   );
 }
 
+function IconX() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
+  );
+}
+
 /* ── Data ─────────────────────────────────────────────────────────── */
 
 const capabilities = [
   {
     icon: <IconUsers />,
-    title: 'CRM & Lead Management',
+    title: 'Never Lose a Lead',
+    subtitle: 'CRM & Lead Management',
     description:
-      'Capture leads from your website, phone, and walk-ins. Track every interaction, automate follow-ups, and move prospects through your pipeline with full visibility.',
-  },
-  {
-    icon: <IconGlobe />,
-    title: 'Website Builder',
-    description:
-      'Launch a professional dealer website in minutes. Choose from multiple templates, customize your branding, and publish your inventory — no developer required.',
-  },
-  {
-    icon: <IconBarChart />,
-    title: 'Listing Feeds & Syndication',
-    description:
-      'Syndicate your inventory to Facebook Marketplace, Google Vehicle Ads, Craigslist, and more. Manage all listing channels from a single dashboard.',
+      'Every inquiry — web, phone, walk-in — lands in one pipeline. Automatic follow-ups make sure no lead goes cold. You see who needs attention right now, not tomorrow.',
   },
   {
     icon: <IconMessageSquare />,
-    title: 'Messaging & Follow-Up',
+    title: 'Respond in Seconds, Not Hours',
+    subtitle: 'SMS & Email Messaging',
     description:
-      'SMS and email from one inbox. Send appointment reminders, status updates, and follow-ups. Templates, scheduling, and conversation history — all built in.',
+      'Text and email customers from one inbox. Pre-built templates, scheduled messages, and full conversation history mean your team responds faster than the competition.',
+  },
+  {
+    icon: <IconGlobe />,
+    title: 'Your Website, Live in Minutes',
+    subtitle: 'Website Builder',
+    description:
+      'Pick a template, add your logo, and your inventory goes live. No developer, no monthly website fee. Customers browse, inquire, and book appointments directly.',
+  },
+  {
+    icon: <IconBarChart />,
+    title: 'Publish Everywhere at Once',
+    subtitle: 'Listing Feeds & Syndication',
+    description:
+      'One click pushes your inventory to Facebook Marketplace, Google Vehicle Ads, Craigslist, and more. Update once — every channel updates automatically.',
   },
   {
     icon: <IconClipboardCheck />,
-    title: 'Inspections & Reconditioning',
+    title: 'Front-Line Ready, Faster',
+    subtitle: 'Inspections & Reconditioning',
     description:
-      'Digital multi-point inspections with photo evidence. Track reconditioning tasks, assign vendors, and get vehicles front-line ready faster.',
+      'Digital multi-point inspections with photo proof. Assign recon tasks, track vendor work, and know exactly when each vehicle is ready to sell.',
   },
   {
     icon: <IconMapPin />,
-    title: 'GPS & Lot Management',
+    title: 'Know Where Every Car Is',
+    subtitle: 'GPS & Lot Management',
     description:
-      'Real-time vehicle tracking, geofencing, trip recording, and lot visibility. Know where every unit is, monitor test drives, and protect your assets.',
+      'Real-time tracking, geofencing, and trip logs for every unit on your lot. Monitor test drives live, get alerts on unauthorized movement, protect your assets 24/7.',
   },
 ];
 
-const advantages = [
-  'One login for your entire operation — no switching between apps',
-  'Customer data flows from lead to sale without manual re-entry',
-  'Real-time dashboards show exactly where your business stands',
-  'Built specifically for independent and BHPH dealers',
-  'Mobile-first design — manage your lot from your phone',
-  'No long-term contracts — scale up or down as you grow',
+const replaces = [
+  { tool: 'Standalone CRM', example: 'DealerSocket, Elead' },
+  { tool: 'Separate DMS', example: 'Frazer, DealerCenter' },
+  { tool: 'Website builder', example: 'Dealer.com, DealerFire' },
+  { tool: 'SMS platform', example: 'Podium, Kenect' },
+  { tool: 'Inspection app', example: 'AutoGrade, paper forms' },
+  { tool: 'GPS tracker dashboard', example: 'Spireon, Ituran' },
 ];
 
 /* ── Page Component ───────────────────────────────────────────────── */
@@ -182,52 +197,54 @@ export default function HomePage() {
             </span>
           </Link>
           <nav className="hidden items-center gap-8 md:flex">
-            <a href="#platform" className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 min-h-0 min-w-0">
-              Platform
-            </a>
-            <a href="#capabilities" className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 min-h-0 min-w-0">
-              Capabilities
-            </a>
-            <a href="#why" className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 min-h-0 min-w-0">
+            <a href="#problem" className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 min-h-0 min-w-0">
               Why Ameriuse
             </a>
+            <a href="#capabilities" className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 min-h-0 min-w-0">
+              Platform
+            </a>
+            <a href="#compare" className="text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 min-h-0 min-w-0">
+              Compare
+            </a>
             <a
-              href="mailto:support@ameriuse.com"
-              className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-gray-800 min-h-0"
+              href="mailto:support@ameriuse.com?subject=Demo%20Request"
+              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-700 min-h-0"
             >
-              Contact Sales
+              Book a Demo
             </a>
           </nav>
           {/* Mobile CTA */}
           <a
-            href="mailto:support@ameriuse.com"
-            className="inline-flex items-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white md:hidden min-h-0 min-w-0"
+            href="mailto:support@ameriuse.com?subject=Demo%20Request"
+            className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white md:hidden min-h-0 min-w-0"
           >
-            Contact
+            Book Demo
           </a>
         </div>
       </header>
 
       {/* ──── HERO ────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white pb-20 pt-16 sm:pt-24 lg:pt-32">
-        {/* Subtle background pattern */}
         <div className="pointer-events-none absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #000 1px, transparent 0)', backgroundSize: '40px 40px' }} />
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700 min-h-0 min-w-0">
               <IconZap />
-              <span>Built for Independent Dealers</span>
+              <span>One platform replaces six tools</span>
             </div>
             <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl" style={{ lineHeight: '1.1' }}>
-              The operating system
+              Stop running your
+              <br />
+              dealership from
               <br />
               <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                for your dealership
+                six different apps
               </span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-gray-600 sm:text-xl">
-              CRM, website, inventory, messaging, inspections, GPS — everything you need to run your lot, unified in one platform. Stop juggling disconnected tools.
+              Ameriuse replaces your CRM, DMS, website builder, messaging tool, inspection app, and GPS tracker with one connected platform.
+              <span className="font-medium text-gray-900"> Built specifically for independent and BHPH dealers.</span>
             </p>
             <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <a
@@ -241,44 +258,43 @@ export default function HomePage() {
                 href="mailto:support@ameriuse.com?subject=Getting%20Started"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-8 py-3.5 text-base font-semibold text-gray-700 transition-all hover:border-gray-300 hover:bg-gray-50 sm:w-auto"
               >
-                Get Started
+                Get Started Free
               </a>
             </div>
+            {/* Trust nudge */}
+            <p className="mt-6 text-sm text-gray-400">No credit card required. Set up in under 10 minutes.</p>
           </div>
 
-          {/* Hero visual — abstract dashboard mockup */}
+          {/* Hero visual — dashboard mockup */}
           <div className="mx-auto mt-16 max-w-5xl">
             <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl shadow-gray-900/10">
-              {/* Browser chrome */}
               <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-4 py-3">
                 <div className="h-3 w-3 rounded-full bg-red-400" />
                 <div className="h-3 w-3 rounded-full bg-amber-400" />
                 <div className="h-3 w-3 rounded-full bg-green-400" />
-                <div className="ml-4 h-6 flex-1 rounded-md bg-gray-200" />
+                <div className="ml-4 flex h-6 flex-1 items-center rounded-md bg-gray-200 px-3">
+                  <span className="text-[10px] text-gray-400">app.ameriuse.com/dashboard</span>
+                </div>
               </div>
-              {/* Dashboard mockup */}
               <div className="grid grid-cols-12 gap-4 p-6">
-                {/* Sidebar */}
                 <div className="col-span-3 hidden space-y-3 lg:block">
                   <div className="h-8 w-24 rounded-lg bg-blue-600" />
                   <div className="mt-6 space-y-2">
-                    {['Dashboard', 'Vehicles', 'Leads', 'Messages', 'Tasks'].map((item) => (
-                      <div key={item} className="flex items-center gap-3 rounded-lg px-3 py-2">
-                        <div className="h-4 w-4 rounded bg-gray-200" />
-                        <span className="text-xs font-medium text-gray-500">{item}</span>
+                    {['Dashboard', 'Vehicles', 'Leads', 'Messages', 'Tasks'].map((item, i) => (
+                      <div key={item} className={`flex items-center gap-3 rounded-lg px-3 py-2 ${i === 0 ? 'bg-blue-50' : ''}`}>
+                        <div className={`h-4 w-4 rounded ${i === 0 ? 'bg-blue-400' : 'bg-gray-200'}`} />
+                        <span className={`text-xs font-medium ${i === 0 ? 'text-blue-700' : 'text-gray-500'}`}>{item}</span>
                       </div>
                     ))}
                   </div>
                 </div>
-                {/* Main content */}
                 <div className="col-span-12 space-y-4 lg:col-span-9">
-                  {/* Stats row */}
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {[
                       { label: 'Active Inventory', value: '47', color: 'bg-blue-50 text-blue-700' },
-                      { label: 'New Leads', value: '12', color: 'bg-green-50 text-green-700' },
-                      { label: 'Pending Tasks', value: '8', color: 'bg-amber-50 text-amber-700' },
-                      { label: 'This Month', value: '$124K', color: 'bg-purple-50 text-purple-700' },
+                      { label: 'New Leads Today', value: '12', color: 'bg-green-50 text-green-700' },
+                      { label: 'Pending Recon', value: '8', color: 'bg-amber-50 text-amber-700' },
+                      { label: 'Revenue (MTD)', value: '$124K', color: 'bg-purple-50 text-purple-700' },
                     ].map((stat) => (
                       <div key={stat.label} className={`rounded-xl p-4 ${stat.color}`}>
                         <p className="text-xs font-medium opacity-70">{stat.label}</p>
@@ -286,7 +302,6 @@ export default function HomePage() {
                       </div>
                     ))}
                   </div>
-                  {/* Content rows */}
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="rounded-xl border border-gray-100 p-4">
@@ -303,34 +318,50 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ──── PLATFORM OVERVIEW ───────────────────────────────── */}
-      <section id="platform" className="bg-white py-20 sm:py-28">
+      {/* ──── PROBLEM → SOLUTION ───────────────────────────────── */}
+      <section id="problem" className="bg-white py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-              One platform. Every part of your dealership.
+              You&apos;re paying for six tools that don&apos;t talk to each other
             </h2>
             <p className="mt-4 text-lg leading-relaxed text-gray-600">
-              Ameriuse replaces the patchwork of spreadsheets, sticky notes, and disconnected software that most independent dealers rely on. From the moment you acquire a vehicle to the moment you hand over the keys, every step lives in one system.
+              Most independent dealers juggle separate software for CRM, inventory, websites, texting, inspections, and GPS. Data gets re-entered. Leads slip through. You waste hours switching between tabs. Ameriuse puts it all in one place.
             </p>
           </div>
 
+          {/* What Ameriuse replaces */}
+          <div className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {replaces.map((item) => (
+              <div key={item.tool} className="flex items-center gap-4 rounded-xl border border-gray-100 bg-gray-50/50 px-5 py-4">
+                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                  <IconCheck />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">Replaces your {item.tool}</p>
+                  <p className="text-xs text-gray-500">{item.example}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Platform pillars */}
           <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-3">
             {[
               {
                 icon: <IconLayers />,
-                title: 'Unified Data',
-                text: 'Customer, vehicle, and transaction data connected across every screen. No duplicate entry, no lost information.',
+                title: 'One Source of Truth',
+                text: 'Customer, vehicle, and deal data connected across every screen. Enter it once — use it everywhere. No more copy-pasting between apps.',
               },
               {
                 icon: <IconZap />,
-                title: 'Built for Speed',
-                text: 'Fast, mobile-first interface designed for the pace of a real lot. Works on your phone, tablet, or desktop.',
+                title: 'Speed That Sells Cars',
+                text: 'Respond to leads in seconds, not hours. Publish inventory instantly. Get vehicles front-line ready faster. Speed is your competitive advantage.',
               },
               {
                 icon: <IconShield />,
-                title: 'Enterprise Grade',
-                text: 'Role-based access control, encrypted data, audit trails, and compliance-ready infrastructure.',
+                title: 'Control & Visibility',
+                text: 'Real-time dashboards show your inventory, leads, revenue, and operations at a glance. Role-based access keeps your team focused and accountable.',
               },
             ].map((item) => (
               <div key={item.title} className="rounded-2xl border border-gray-100 bg-gray-50/50 p-8 text-center">
@@ -342,6 +373,17 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+
+          {/* Section CTA */}
+          <div className="mt-12 text-center">
+            <a
+              href="mailto:support@ameriuse.com?subject=Demo%20Request"
+              className="inline-flex items-center gap-2 text-base font-semibold text-blue-600 transition-colors hover:text-blue-700"
+            >
+              See how it works — book a 15-minute demo
+              <IconArrowRight />
+            </a>
+          </div>
         </div>
       </section>
 
@@ -350,10 +392,10 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-              Everything you need to run your lot
+              Six modules. One platform. Zero gaps.
             </h2>
             <p className="mt-4 text-lg text-gray-600">
-              Six integrated modules that cover the full dealership lifecycle.
+              From the moment you acquire a vehicle to the moment you hand over the keys — every step lives in Ameriuse.
             </p>
           </div>
 
@@ -367,71 +409,103 @@ export default function HomePage() {
                   {cap.icon}
                 </div>
                 <h3 className="mt-5 text-lg font-bold text-gray-900">{cap.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-gray-600">{cap.description}</p>
+                <p className="mt-1 text-xs font-medium uppercase tracking-wider text-blue-600">{cap.subtitle}</p>
+                <p className="mt-3 text-sm leading-relaxed text-gray-600">{cap.description}</p>
               </div>
             ))}
+          </div>
+
+          {/* Section CTA */}
+          <div className="mt-14 text-center">
+            <a
+              href="mailto:support@ameriuse.com?subject=Demo%20Request"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-700"
+            >
+              Book a Demo
+              <IconArrowRight />
+            </a>
+            <p className="mt-3 text-sm text-gray-400">See all six modules in action. 15 minutes, no pressure.</p>
           </div>
         </div>
       </section>
 
-      {/* ──── WHY AMERIUSE ────────────────────────────────────── */}
-      <section id="why" className="bg-white py-20 sm:py-28">
+      {/* ──── COMPARISON ───────────────────────────────────────── */}
+      <section id="compare" className="bg-white py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
-            <div>
-              <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                Why dealers switch to Ameriuse
-              </h2>
-              <p className="mt-4 text-lg leading-relaxed text-gray-600">
-                Independent dealers don&apos;t need ten different subscriptions and a IT department to compete. Ameriuse gives you the same operational power as franchise stores — at a fraction of the cost and complexity.
-              </p>
-              <ul className="mt-8 space-y-4">
-                {advantages.map((adv) => (
-                  <li key={adv} className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-50 text-green-600 min-h-0 min-w-0">
-                      <IconCheck />
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+              The difference is obvious
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">
+              See what changes when you stop stitching together disconnected software.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-16 grid max-w-4xl grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* Without */}
+            <div className="rounded-2xl border border-red-100 bg-red-50/50 p-8">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-red-600">Without Ameriuse</h3>
+              <ul className="mt-6 space-y-4">
+                {[
+                  'Leads come in from 4 places — nobody knows who followed up',
+                  'Customer texts your personal phone — no record, no accountability',
+                  'Recon status lives on a whiteboard that nobody updates',
+                  'Inventory goes on your website days after it hits the lot',
+                  'You pay $500+/month for tools that don\'t connect',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-red-100 text-red-500">
+                      <IconX />
                     </span>
-                    <span className="text-base text-gray-700">{adv}</span>
+                    <span className="text-sm text-red-800">{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Right visual — comparison */}
-            <div className="space-y-6">
-              <div className="rounded-2xl border border-red-100 bg-red-50/50 p-6">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-red-600">Without Ameriuse</h3>
-                <ul className="mt-4 space-y-2 text-sm text-red-700">
-                  <li>Separate CRM, DMS, and inventory tools that don&apos;t talk to each other</li>
-                  <li>Leads fall through the cracks between systems</li>
-                  <li>Manual data re-entry across multiple platforms</li>
-                  <li>No single view of your customer or your lot</li>
-                  <li>Multiple subscriptions adding up to $500+/month</li>
-                </ul>
-              </div>
-              <div className="rounded-2xl border border-green-100 bg-green-50/50 p-6">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-green-600">With Ameriuse</h3>
-                <ul className="mt-4 space-y-2 text-sm text-green-700">
-                  <li>One platform from acquisition to sold — no gaps</li>
-                  <li>Every lead tracked, every follow-up automated</li>
-                  <li>Enter data once, use it everywhere</li>
-                  <li>Real-time dashboards for inventory, sales, and operations</li>
-                  <li>One subscription, full operational coverage</li>
-                </ul>
-              </div>
+            {/* With */}
+            <div className="rounded-2xl border border-green-100 bg-green-50/50 p-8">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-green-600">With Ameriuse</h3>
+              <ul className="mt-6 space-y-4">
+                {[
+                  'Every lead auto-captured and assigned — nothing falls through',
+                  'All texts and emails in one inbox with full history',
+                  'Recon tasks tracked digitally with photos, vendors, and timelines',
+                  'Inventory goes live the moment you add a vehicle',
+                  'One subscription covers your entire operation',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-green-100 text-green-600">
+                      <IconCheck />
+                    </span>
+                    <span className="text-sm text-green-800">{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
+          </div>
+
+          {/* Section CTA */}
+          <div className="mt-12 text-center">
+            <a
+              href="mailto:support@ameriuse.com?subject=Demo%20Request"
+              className="inline-flex items-center gap-2 text-base font-semibold text-blue-600 transition-colors hover:text-blue-700"
+            >
+              Ready to make the switch? Let&apos;s talk
+              <IconArrowRight />
+            </a>
           </div>
         </div>
       </section>
 
-      {/* ──── SOCIAL PROOF ────────────────────────────────────── */}
+      {/* ──── TRUST / METRICS ──────────────────────────────────── */}
       <section className="bg-slate-50 py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             {[
-              { value: '6', label: 'Integrated Modules' },
-              { value: '24/7', label: 'System Uptime' },
-              { value: '<2min', label: 'Average Response Time' },
+              { value: '6-in-1', label: 'Tools Replaced' },
+              { value: '< 2 min', label: 'Avg. Lead Response' },
+              { value: '99.9%', label: 'Platform Uptime' },
               { value: '100%', label: 'Mobile Ready' },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
@@ -443,14 +517,62 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ──── WHY DEALERS SWITCH ───────────────────────────────── */}
+      <section className="bg-white py-20 sm:py-28">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+              Built for how you actually work
+            </h2>
+            <p className="mt-4 text-lg leading-relaxed text-gray-600">
+              Ameriuse gives independent dealers the same operational power as franchise stores — without the complexity or the price tag.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-12 max-w-2xl">
+            <ul className="space-y-5">
+              {[
+                { text: 'One login for your entire operation', detail: 'No switching between 6 different apps to run your day' },
+                { text: 'Data flows from lead to sale automatically', detail: 'Customer info, vehicle details, and deal history — connected end to end' },
+                { text: 'Real-time dashboards that actually matter', detail: 'Inventory aging, lead pipeline, revenue trends — all at a glance' },
+                { text: 'Built for independents and BHPH, not enterprise', detail: 'No bloated features you\'ll never use. Fast setup, no IT team required' },
+                { text: 'Works on your phone', detail: 'Full functionality from the lot, the auction, or anywhere else' },
+                { text: 'No long-term contracts', detail: 'Month-to-month pricing. Scale up or down as your business changes' },
+              ].map((adv) => (
+                <li key={adv.text} className="flex items-start gap-4">
+                  <span className="mt-1 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-50 text-green-600 min-h-0 min-w-0">
+                    <IconCheck />
+                  </span>
+                  <div>
+                    <p className="text-base font-semibold text-gray-900">{adv.text}</p>
+                    <p className="mt-0.5 text-sm text-gray-500">{adv.detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Section CTA */}
+          <div className="mt-14 text-center">
+            <a
+              href="mailto:support@ameriuse.com?subject=Getting%20Started"
+              className="inline-flex items-center gap-2 text-base font-semibold text-blue-600 transition-colors hover:text-blue-700"
+            >
+              Start your free trial today
+              <IconArrowRight />
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* ──── FINAL CTA ───────────────────────────────────────── */}
       <section className="bg-gray-900 py-20 sm:py-28">
         <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-            Ready to run your dealership from one place?
+            Your dealership deserves better than a spreadsheet
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-400">
-            See how Ameriuse can streamline your operations. Book a personalized demo with our team, or get started today.
+            Join independent dealers who replaced their patchwork of tools with one platform that actually works together. Set up takes less than 10 minutes.
           </p>
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <a
@@ -464,9 +586,10 @@ export default function HomePage() {
               href="mailto:support@ameriuse.com?subject=Getting%20Started"
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-gray-700 px-8 py-3.5 text-base font-semibold text-gray-300 transition-all hover:border-gray-500 hover:text-white sm:w-auto"
             >
-              Contact Sales
+              Get Started Free
             </a>
           </div>
+          <p className="mt-5 text-sm text-gray-500">No credit card required. No long-term contract.</p>
         </div>
       </section>
 
@@ -478,11 +601,11 @@ export default function HomePage() {
               <span className="text-xl font-extrabold text-white" style={{ fontFamily: '"DM Sans", sans-serif' }}>
                 ameriuse
               </span>
-              <p className="mt-1 text-sm text-gray-500">Dealership Operating System</p>
+              <p className="mt-1 text-sm text-gray-500">The Dealership Operating System</p>
             </div>
             <nav className="flex flex-wrap items-center gap-6">
               <a href="mailto:support@ameriuse.com" className="text-sm text-gray-400 transition-colors hover:text-white min-h-0 min-w-0">
-                Support
+                Contact
               </a>
               <Link href="/privacy" className="text-sm text-gray-400 transition-colors hover:text-white min-h-0 min-w-0">
                 Privacy Policy
