@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -381,13 +382,15 @@ export default function HomeContent() {
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <Link href="/" className="flex items-center min-h-0 min-w-0">
-            <span
-              className="text-2xl font-extrabold tracking-wider text-white"
-              style={{ fontFamily: displayFont }}
-            >
-              AMERIUSE
-            </span>
+          <Link href="/" className="flex items-center min-h-0 min-w-0 group">
+            <Image
+              src="/logo.png"
+              alt="Ameriuse"
+              width={140}
+              height={32}
+              className="h-8 w-auto transition-all duration-300 group-hover:drop-shadow-[0_0_8px_rgba(37,99,235,0.6)]"
+              priority
+            />
           </Link>
           <nav className="hidden items-center gap-8 md:flex">
             <a href="#problem" className="text-sm font-medium text-white/50 transition-colors hover:text-white min-h-0 min-w-0">
@@ -407,6 +410,18 @@ export default function HomeContent() {
             >
               Log In
             </a>
+            {/* Social links */}
+            <div className="flex items-center gap-1.5">
+              <a href="https://www.instagram.com/ameriuse?igsh=Y2R2bmM5OW12dWkx&utm_source=qr" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Instagram">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+              </a>
+              <a href="https://www.facebook.com/share/18Pgn8bjcQ/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Facebook">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+              </a>
+              <a href="https://www.linkedin.com/company/ameriuse/" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="LinkedIn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              </a>
+            </div>
             <a
               href="mailto:support@ameriuse.com?subject=Demo%20Request"
               className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-500 min-h-0"
@@ -453,6 +468,18 @@ export default function HomeContent() {
         <div className="absolute left-0 top-[30%] h-[1px] w-[200px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(37,99,235,0.4), transparent)', animation: 'home-streak 8s linear infinite' }} />
         <div className="absolute left-0 top-[55%] h-[1px] w-[300px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(37,99,235,0.2), transparent)', animation: 'home-streak 12s linear 4s infinite' }} />
         <div className="absolute left-0 top-[75%] h-[1px] w-[150px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)', animation: 'home-streak 10s linear 7s infinite' }} />
+        {/* Ghosted logo watermark */}
+        <div className="absolute right-[5%] top-1/2 -translate-y-1/2 pointer-events-none select-none hidden lg:block" style={{ width: 500, height: 500 }}>
+          <Image
+            src="/logo.png"
+            alt=""
+            width={500}
+            height={500}
+            className="w-full h-full object-contain"
+            style={{ filter: 'brightness(10) opacity(0.04)' }}
+            aria-hidden="true"
+          />
+        </div>
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl text-center">
@@ -983,13 +1010,14 @@ export default function HomeContent() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-8 sm:flex-row">
             <div>
-              <span
-                className="text-xl font-extrabold tracking-wider text-white"
-                style={{ fontFamily: displayFont }}
-              >
-                AMERIUSE
-              </span>
-              <p className="mt-1 text-sm text-white/30">The Dealership Operating System</p>
+              <Image
+                src="/logo.png"
+                alt="Ameriuse"
+                width={120}
+                height={28}
+                className="h-7 w-auto opacity-70"
+              />
+              <p className="mt-2 text-sm text-white/30">The Dealership Operating System</p>
             </div>
             <nav className="flex flex-wrap items-center gap-6">
               <a
@@ -1012,7 +1040,19 @@ export default function HomeContent() {
               </Link>
             </nav>
           </div>
-          <div className="mt-8 border-t border-white/[0.06] pt-8 text-center text-sm text-white/20">
+          {/* Social links */}
+          <div className="mt-8 border-t border-white/[0.06] pt-6 flex justify-center gap-3">
+            <a href="https://www.instagram.com/ameriuse?igsh=Y2R2bmM5OW12dWkx&utm_source=qr" target="_blank" rel="noopener noreferrer" className="social-link social-link-lg" aria-label="Instagram">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+            </a>
+            <a href="https://www.facebook.com/share/18Pgn8bjcQ/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="social-link social-link-lg" aria-label="Facebook">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            </a>
+            <a href="https://www.linkedin.com/company/ameriuse/" target="_blank" rel="noopener noreferrer" className="social-link social-link-lg" aria-label="LinkedIn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            </a>
+          </div>
+          <div className="mt-4 text-center text-sm text-white/20">
             &copy; {new Date().getFullYear()} Ameriuse. All rights reserved.
           </div>
         </div>

@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   description: 'The all-in-one platform for independent auto dealers. CRM, website builder, inventory, messaging, inspections, GPS — unified in a single system.',
   robots: 'index, follow',
   metadataBase: new URL('https://ameriuse.com'),
+  icons: {
+    icon: '/logo.png',
+  },
 };
 
 export default function RootLayout({
