@@ -19,7 +19,7 @@
   }
 
   body {
-    @apply bg-white text-gray-900;
+    @apply bg-[#08111f] text-gray-900;
   }
 
   .dark body {
@@ -196,7 +196,7 @@ button.icon-only, a.icon-only {
 
 /* Light mode — explicit pure white */
 body {
-  background: #ffffff;
+  background: #08111f;
   color: #0f172a;
 }
 

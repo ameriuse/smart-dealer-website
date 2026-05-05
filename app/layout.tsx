@@ -1,18 +1,40 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import './globals.css';
 
-export const metadata: Metadata = {
-  title: {
-    default: 'Ameriuse — Dealership Operating System',
-    template: '%s — Ameriuse',
-  },
-  description: 'The all-in-one platform for independent auto dealers. CRM, website builder, inventory, messaging, inspections, GPS — unified in a single system.',
-  robots: 'index, follow',
-  metadataBase: new URL('https://ameriuse.com'),
-  icons: {
-    icon: '/logo.png',
-  },
-};
+const SMART_DEALER_HOST = 'smartdealer.ameriuse.com';
+
+export function generateMetadata(): Metadata {
+  const host = headers().get('host')?.split(':')[0].toLowerCase();
+  const isSmartDealer = host === SMART_DEALER_HOST;
+
+  return {
+    title: {
+      default: isSmartDealer
+        ? 'Smart Dealer by Ameriuse - Inspection-First Dealer OS'
+        : 'Ameriuse - Vehicle Commerce and Intelligence',
+      template: isSmartDealer ? '%s - Smart Dealer' : '%s - Ameriuse',
+    },
+    description: isSmartDealer
+      ? 'Smart Dealer is Ameriuse pilot software for inspection-first dealer workflows, inventory, messaging, and vehicle handoff.'
+      : 'Ameriuse builds vehicle commerce and intelligence tools for dealers, builders, and teams working with vehicle data.',
+    robots: 'index, follow',
+    icons: {
+      icon: [
+        {
+          url: isSmartDealer ? '/dealer-favicon.svg?v=202605' : '/favicon.svg?v=202605',
+          type: 'image/svg+xml',
+        },
+      ],
+      apple: [
+        {
+          url: isSmartDealer ? '/dealer-apple-touch-icon.png?v=202605' : '/apple-touch-icon.png?v=202605',
+        },
+      ],
+    },
+    manifest: isSmartDealer ? '/dealer.webmanifest' : '/site.webmanifest',
+  };
+}
 
 export default function RootLayout({
   children,
@@ -29,7 +51,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-white text-gray-900 antialiased">
+      <body className="min-h-screen bg-[#08111f] text-gray-900 antialiased">
         {children}
       </body>
     </html>

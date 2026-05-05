@@ -1,14 +1,19 @@
 import type { MetadataRoute } from 'next';
 import { getDealer, getVehicles } from '@/lib/api';
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://smart-dealer-website.vercel.app';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://smartdealer.ameriuse.com';
+const COMPANY_URL = 'https://ameriuse.com';
 
 // Dealer slugs to generate sitemaps for.
 // In a full multi-tenant setup this would come from the DB.
 const DEALER_SLUGS: string[] = [];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const routes: MetadataRoute.Sitemap = [];
+  const routes: MetadataRoute.Sitemap = [
+    { url: COMPANY_URL, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
+    { url: `${COMPANY_URL}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.4 },
+    { url: `${COMPANY_URL}/terms`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.4 },
+  ];
 
   for (const slug of DEALER_SLUGS) {
     const dealer = await getDealer(slug);

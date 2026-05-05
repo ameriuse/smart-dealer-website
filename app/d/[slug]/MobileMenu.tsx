@@ -7,9 +7,10 @@ interface MobileMenuProps {
   slug: string;
   navLinks: Array<{ href: string; label: string }>;
   phone: string | null;
+  darkHeader?: boolean;
 }
 
-export default function MobileMenu({ slug, navLinks, phone }: MobileMenuProps) {
+export default function MobileMenu({ slug, navLinks, phone, darkHeader = false }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -17,7 +18,9 @@ export default function MobileMenu({ slug, navLinks, phone }: MobileMenuProps) {
       {/* Hamburger button */}
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center justify-center w-10 h-10 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+        className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors ${
+          darkHeader ? 'text-white/80 hover:bg-white/10 hover:text-white' : 'text-gray-600 hover:bg-gray-100'
+        }`}
         aria-label="Open menu"
       >
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

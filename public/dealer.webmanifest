@@ -1,0 +1,12 @@
+{
+  "name": "Smart Dealer by Ameriuse",
+  "short_name": "Smart Dealer",
+  "icons": [
+    { "src": "/dealer-apple-touch-icon.png?v=202605", "sizes": "180x180", "type": "image/png" },
+    { "src": "/dealer-icon-192.png?v=202605", "sizes": "192x192", "type": "image/png" },
+    { "src": "/dealer-icon-512.png?v=202605", "sizes": "512x512", "type": "image/png" }
+  ],
+  "theme_color": "#07111f",
+  "background_color": "#07111f",
+  "display": "standalone"
+}

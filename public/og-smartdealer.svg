@@ -1,0 +1,12 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#07111f"/>
+  <rect x="90" y="115" width="1020" height="400" rx="34" fill="#0b1526" stroke="#24466f"/>
+  <text x="135" y="225" fill="#eaf7ff" font-family="Arial, sans-serif" font-size="68" font-weight="800">Smart Dealer by Ameriuse</text>
+  <text x="137" y="292" fill="#9fb7ca" font-family="Arial, sans-serif" font-size="33">Inspection-first dealer workflows</text>
+  <rect x="135" y="360" width="230" height="74" rx="16" fill="#102849" stroke="#2f6bff"/>
+  <text x="169" y="407" fill="#ffffff" font-family="Arial, sans-serif" font-size="26" font-weight="700">Inventory</text>
+  <rect x="395" y="360" width="220" height="74" rx="16" fill="#092b35" stroke="#2dd4ff"/>
+  <text x="431" y="407" fill="#ffffff" font-family="Arial, sans-serif" font-size="26" font-weight="700">Recon</text>
+  <rect x="645" y="360" width="230" height="74" rx="16" fill="#0b2f28" stroke="#6ee7b7"/>
+  <text x="679" y="407" fill="#ffffff" font-family="Arial, sans-serif" font-size="26" font-weight="700">Messaging</text>
+</svg>

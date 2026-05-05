@@ -57,15 +57,23 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
   const secondaryColor = cfg?.secondaryColor ?? '#1e40af';
   const accentColor = cfg?.accentColor ?? '#3B82F6';
   const displayLogoUrl = cfg?.logoUrl || dealer.logoUrl;
+  const isDemoDealer = slug === 'demo-dealership';
+  const dealerPrimaryColor = isDemoDealer ? '#2f6bff' : primaryColor;
+  const dealerSecondaryColor = isDemoDealer ? '#2458d8' : secondaryColor;
+  const dealerAccentColor = isDemoDealer ? '#2dd4ff' : accentColor;
 
   // CSS variables: use template override (PRISM fixed gold) or dealer config colors
   const cssVars =
-    template.theme.cssVarsOverride ??
-    `--primary: ${primaryColor}; --secondary: ${secondaryColor}; --accent: ${accentColor}; --primary-foreground: #ffffff; --bg: #ffffff; --surface: #f8fafc; --text: #0f172a;`;
+    isDemoDealer
+      ? `--primary: ${dealerPrimaryColor}; --secondary: ${dealerSecondaryColor}; --accent: ${dealerAccentColor}; --primary-foreground: #ffffff; --bg: #ffffff; --surface: #f8fafc; --text: #0f172a;`
+      : template.theme.cssVarsOverride ??
+        `--primary: ${dealerPrimaryColor}; --secondary: ${dealerSecondaryColor}; --accent: ${dealerAccentColor}; --primary-foreground: #ffffff; --bg: #ffffff; --surface: #f8fafc; --text: #0f172a;`;
 
   // ── Header class resolution ────────────────────────────────────────────────
   const headerClass =
-    template.theme.headerBg === 'dark'
+    isDemoDealer
+      ? 'border-b border-white/10 bg-[#08111f]/95 backdrop-blur sticky top-0 z-50 shadow-sm'
+      : template.theme.headerBg === 'dark'
       ? `border-b sticky top-0 z-50 ${template.theme.headerExtraBorderClass}`
       : template.theme.headerBg === 'primary'
       ? `sticky top-0 z-50 shadow-sm ${template.theme.headerExtraBorderClass}`
@@ -73,21 +81,23 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
 
   // ── Nav/logo/phone styling ─────────────────────────────────────────────────
   const navLinkClass =
-    template.theme.navStyle === 'white-on-primary'
+    isDemoDealer
+      ? 'px-4 py-2 rounded-md text-sm font-medium text-white/75 hover:text-white hover:bg-white/10 transition-colors'
+      : template.theme.navStyle === 'white-on-primary'
       ? 'px-4 py-2 rounded-md text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors'
       : template.theme.navStyle === 'gold-on-dark'
       ? 'px-4 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-[#c9a84c] transition-colors'
       : 'px-4 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors';
 
-  const logoTextClass = template.theme.logoOnDark
+  const logoTextClass = isDemoDealer || template.theme.logoOnDark
     ? 'text-lg font-bold text-white truncate max-w-[200px]'
     : 'text-lg font-bold text-gray-900 dark:text-white truncate max-w-[200px]';
 
-  const phoneClass = template.theme.phoneOnDark
+  const phoneClass = isDemoDealer || template.theme.phoneOnDark
     ? 'flex items-center gap-2 text-sm font-semibold text-white/90 hover:text-white transition-colors whitespace-nowrap'
     : 'flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-gray-900 transition-colors whitespace-nowrap';
 
-  const phoneIconClass = `w-4 h-4 flex-shrink-0 ${template.theme.phoneOnDark ? 'text-white/60' : 'text-gray-400'}`;
+  const phoneIconClass = `w-4 h-4 flex-shrink-0 ${isDemoDealer || template.theme.phoneOnDark ? 'text-white/60' : 'text-gray-400'}`;
 
   return (
     <div className={`template-${template.id}`}>
@@ -105,13 +115,13 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
       {/* ── Header ── */}
       <header
         className={headerClass}
-        style={template.theme.headerBg === 'primary' ? { backgroundColor: 'var(--primary)' } : undefined}
+        style={!isDemoDealer && template.theme.headerBg === 'primary' ? { backgroundColor: 'var(--primary)' } : undefined}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16 gap-3">
 
             {/* Mobile hamburger (left) */}
-            <MobileMenu slug={slug} navLinks={navLinks} phone={dealer.phone ?? null} />
+            <MobileMenu slug={slug} navLinks={navLinks} phone={dealer.phone ?? null} darkHeader={isDemoDealer} />
 
             {/* Logo */}
             <Link href={`/d/${slug}`} className="flex items-center min-w-0 mr-auto lg:mr-0 flex-shrink-0">
@@ -121,7 +131,7 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
                   alt={dealer.name}
                   width={140}
                   height={44}
-                  className="h-10 w-auto object-contain"
+                  className={`h-10 w-auto object-contain ${isDemoDealer ? 'brightness-0 invert drop-shadow-[0_1px_8px_rgba(255,255,255,0.18)]' : ''}`}
                   priority
                 />
               ) : (
@@ -331,7 +341,13 @@ export default async function DealerLayout({ children, params }: DealerLayoutPro
 
           <div className="mt-10 pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-xs text-gray-500">
-              &copy; {new Date().getFullYear()} {dealer.name}. All rights reserved.
+                    &copy; {new Date().getFullYear()} {dealer.name}. All rights reserved.
+                    {isDemoDealer && (
+                      <>
+                        {' '}
+                        Powered by Smart Dealer - an Ameriuse product.
+                      </>
+                    )}
             </p>
             {cfg?.footerText && (
               <p className="text-xs text-gray-600">{cfg.footerText}</p>

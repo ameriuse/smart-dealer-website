@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import BrandLockup from './brand-lockup';
 
 /* ═══════════════════════════════════════════════════════════════════
    SCROLL REVEAL
@@ -382,15 +383,8 @@ export default function HomeContent() {
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <Link href="/" className="flex items-center min-h-0 min-w-0 group">
-            <Image
-              src="/logo.png"
-              alt="Ameriuse"
-              width={140}
-              height={32}
-              className="h-8 w-auto transition-all duration-300 group-hover:drop-shadow-[0_0_8px_rgba(37,99,235,0.6)]"
-              priority
-            />
+          <Link href="/" className="flex items-center min-h-0 min-w-0 group" aria-label="Smart Dealer home">
+            <BrandLockup mode="dealer" />
           </Link>
           <nav className="hidden items-center gap-8 md:flex">
             <a href="#problem" className="text-sm font-medium text-white/50 transition-colors hover:text-white min-h-0 min-w-0">
@@ -403,25 +397,11 @@ export default function HomeContent() {
               Compare
             </a>
             <a
-              href="https://ameriuse.web.app"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/login"
               className="text-sm font-medium text-white/50 transition-colors hover:text-white min-h-0 min-w-0"
             >
               Log In
             </a>
-            {/* Social links */}
-            <div className="flex items-center gap-1.5">
-              <a href="https://www.instagram.com/ameriuse?igsh=Y2R2bmM5OW12dWkx&utm_source=qr" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Instagram">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
-              </a>
-              <a href="https://www.facebook.com/share/18Pgn8bjcQ/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="Facebook">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-              </a>
-              <a href="https://www.linkedin.com/company/ameriuse/" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="LinkedIn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-              </a>
-            </div>
             <a
               href="mailto:support@ameriuse.com?subject=Demo%20Request"
               className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-500 min-h-0"
@@ -432,9 +412,7 @@ export default function HomeContent() {
           </nav>
           <div className="flex items-center gap-3 md:hidden">
             <a
-              href="https://ameriuse.web.app"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/login"
               className="text-sm text-white/50 min-h-0 min-w-0"
             >
               Log In
@@ -513,9 +491,7 @@ export default function HomeContent() {
                 <IconArrowRight />
               </a>
               <a
-                href="https://ameriuse.web.app"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/login"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.03] px-8 py-4 text-base font-semibold text-white/80 backdrop-blur-sm transition-all hover:border-white/[0.2] hover:bg-white/[0.06] sm:w-auto"
               >
                 Log In to App
@@ -535,7 +511,7 @@ export default function HomeContent() {
                 <div className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
                 <div className="h-2.5 w-2.5 rounded-full bg-green-400/80" />
                 <div className="ml-3 flex h-6 flex-1 items-center rounded-md bg-white/[0.04] px-3">
-                  <span className="text-[10px] text-white/25">app.ameriuse.com/dashboard</span>
+                  <span className="text-[10px] text-white/25">smartdealer.ameriuse.com/dashboard</span>
                 </div>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -990,9 +966,7 @@ export default function HomeContent() {
                 <IconArrowRight />
               </a>
               <a
-                href="https://ameriuse.web.app"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/login"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.12] bg-white/[0.03] px-8 py-4 text-base font-semibold text-white/80 transition-all hover:border-white/[0.2] hover:bg-white/[0.06] sm:w-auto"
               >
                 Log In to App
